@@ -6,7 +6,7 @@ import {
   StyleSheet,
 } from "react-native";
 import React from "react";
-import { OnBoardingButtonParams } from "../../TypesCheck/OnboardingTypesCheck";
+import { OnBoardingButtonParams } from "../../TypesCheck/OnBoardingTypesCheck";
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
@@ -17,6 +17,8 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParams } from "../../Navigation/RootNavigator";
 
+type Props = {};
+
 const OnBoardingButton = ({
   flatListIndex,
   flatListRef,
@@ -25,41 +27,59 @@ const OnBoardingButton = ({
 }: OnBoardingButtonParams) => {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
 
-  const buttonAnimation = useAnimatedStyle(() => ({
-    width: flatListIndex.value === itemLength - 1 ? withSpring(140) : withSpring(60),
-    height: 60,
-  }));
+  const buttonAnimation = useAnimatedStyle(() => {
+    return {
+      width:
+        flatListIndex.value === itemLength - 1
+          ? withSpring(140)
+          : withSpring(60),
+      height: 60,
+    };
+  });
+  const arrowAnimation = useAnimatedStyle(() => {
+    return {
+      opacity:
+        flatListIndex.value === itemLength - 1 ? withTiming(0) : withTiming(1),
+      width: 30,
+      height: 30,
+      transform: [
+        {
+          translateX:
+            flatListIndex.value === itemLength - 1
+              ? withTiming(100)
+              : withTiming(0),
+        },
+      ],
+    };
+  });
 
-  const arrowAnimation = useAnimatedStyle(() => ({
-    opacity: flatListIndex.value === itemLength - 1 ? withTiming(0) : withTiming(1),
-    width: 30,
-    height: 30,
-    transform: [
-      {
-        translateX: flatListIndex.value === itemLength - 1 ? withTiming(100) : withTiming(0),
-      },
-    ],
-  }));
-
-  const textAnimation = useAnimatedStyle(() => ({
-    opacity: flatListIndex.value === itemLength - 1 ? withTiming(1) : withTiming(0),
-    transform: [
-      {
-        translateX: flatListIndex.value === itemLength - 1 ? withTiming(0) : withTiming(100),
-      },
-    ],
-  }));
-
+  const textAnimation = useAnimatedStyle(() => {
+    return {
+      opacity:
+        flatListIndex.value === itemLength - 1 ? withTiming(1) : withTiming(0),
+      transform: [
+        {
+          translateX:
+            flatListIndex.value === itemLength - 1
+              ? withTiming(0)
+              : withTiming(100),
+        },
+      ],
+    };
+  });
   const colorAnimation = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       x.value,
       [0, SCREEN_WIDTH, 2 * SCREEN_WIDTH],
+
       ["#c80dfc", "#250dfc", "#251357"]
     );
-    return { backgroundColor };
+    return {
+      backgroundColor: backgroundColor,
+    };
   });
-
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParams>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParams>>();
 
   return (
     <TouchableWithoutFeedback
@@ -69,18 +89,18 @@ const OnBoardingButton = ({
             index: flatListIndex.value + 1,
           });
         } else {
-          // navigation.replace("TabsStack", { screen: "Home" });
+          // navigation.replace("TabsStack", { screen: "Home" })
           alert("Click here to START shopping online!!!");
         }
       }}
     >
-      <Animated.View style={[styles.container, buttonAnimation, colorAnimation]}>
-        <Animated.Text style={[styles.textButton, textAnimation]}>
+      <Animated.View style={[sty.container, buttonAnimation, colorAnimation]}>
+        <Animated.Text style={[sty.textButton, textAnimation]}>
           Get Started
         </Animated.Text>
         <Animated.Image
-          source={require("../../../assets/splash-icon.png")}
-          style={[styles.arrow, arrowAnimation]}
+          source={require("../../../assets/favicon.png")}
+          style={[sty.arrow, arrowAnimation]}
         />
       </Animated.View>
     </TouchableWithoutFeedback>
@@ -88,8 +108,7 @@ const OnBoardingButton = ({
 };
 
 export default OnBoardingButton;
-
-const styles = StyleSheet.create({
+const sty = StyleSheet.create({
   container: {
     backgroundColor: "#c822fc",
     padding: 10,

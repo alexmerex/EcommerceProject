@@ -1,17 +1,17 @@
 import { View, Text, ViewToken } from "react-native";
 import React, { useState } from "react";
 import { RootStackScreenProps } from "../Navigation/RootNavigator";
-import { OnBoardingPrograms } from "../TypesCheck/OnboardingTypesCheck";
+import { OnBoardingPrograms } from "../TypesCheck/OnBoardingTypesCheck";
 import { OnBoardingData } from "../Data/EcommerceAppData";
 import Animated, {
   useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-import OnBoardingItems from "../Components/OnboardingComponents/OnboardingItems";
+import OnBoardingItems from "../Components/OnBoardingComponents/OnBoardingItems";
 import { FlatList } from "react-native-reanimated/lib/typescript/Animated";
-import OnBoardingPagination from "../Components/OnboardingComponents/OnBoardingPagination";
-import OnBoardingButton from "./../Components/OnboardingComponents/OnboardingButton";
+import OnBoardingPagination from "../Components/OnBoardingComponents/OnBoardingPagination";
+import OnBoardingButton from "../Components/OnBoardingComponents/OnBoardingButton";
 type Props = {};
 
 const OnBoardingScreen = ({
