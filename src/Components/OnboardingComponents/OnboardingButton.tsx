@@ -89,10 +89,10 @@ const OnBoardingButton = ({
             index: flatListIndex.value + 1,
           });
         } else {
-          // navigation.replace("TabsStack", { screen: "Home" })
-          alert("Click here to START shopping online!!!");
+          navigation.replace("TabsStack");
         }
       }}
+
     >
       <Animated.View style={[sty.container, buttonAnimation, colorAnimation]}>
         <Animated.Text style={[sty.textButton, textAnimation]}>

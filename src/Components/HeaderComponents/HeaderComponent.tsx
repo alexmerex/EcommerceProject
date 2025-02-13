@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Pressable, TextInput } from "react-native"
 import React, { useState } from "react"
-import { Entypo, AntDesign, Ionicons } from "@expo/vector-icons"
+import { Entypo, AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import { GoBack } from "./GoBackButton";
 
 interface IHeaderParams {
@@ -24,6 +24,27 @@ export const HeadersComponent = ({ gotoPrevious, search, cartLength, gotoCartScr
                 </Pressable>
                 <TextInput value={searchInput} onChangeText={setSearchInput} placeholder="search Items ..." />
             </Pressable>
+            <Pressable onPress={gotoCartScreen}>
+                <View style={styles.cartNum}>
+                    <Text style={{ color: "pink" }}>
+                        {cartLength}
+                    </Text>
+                </View>
+                <MaterialIcons name="shopping-cart" size={24} color="white" style={{ padding: 5, marginTop: 3 }} />
+            </Pressable>
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    cartNum: {
+        position: "absolute",
+        top: -4,
+        right: -4,
+        backgroundColor: "red",
+        borderRadius: 10,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        zIndex: 1,
+    },
+});
