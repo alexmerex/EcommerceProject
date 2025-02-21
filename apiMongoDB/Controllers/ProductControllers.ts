@@ -52,3 +52,12 @@ export const getAllProducts = async (req: Request, res: Response) => {
         res.status(500).json(`Products not found ${error} :-( `);
     }
 };
+
+export const getFeaturedProducts = async (req: Request, res: Response) => {
+    try {
+        const result = await PRODUCTS.find({ isFeatured: true });
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json(`Featured Products fetch failed: ${error} :-( `);
+    }
+};
