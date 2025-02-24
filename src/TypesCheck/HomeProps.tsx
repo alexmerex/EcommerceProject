@@ -1,4 +1,6 @@
 export interface ProductListParams {
+    category: any;
+    isFeatured(isFeatured: any): unknown;
     _id: string;
     images: [string];
     name: string;
