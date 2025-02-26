@@ -5,14 +5,23 @@ import {
 import { CompositeScreenProps } from "@react-navigation/native";
 import { RootStackScreenProps } from "./RootNavigator";
 import HomeScreen from "../Screens/HomeScreen";
-import CartScreen from "./../Screens/CartScreen";
+import CartScreen from "../Screens/CartScreen";
 import PaymentScreen from "../Screens/PaymentScreen";
 import ProfileScreen from "../Screens/ProfileScreen";
 import { Entypo, AntDesign, Ionicons } from "@expo/vector-icons";
 
+// ✅ Cập nhật TabsStackParams với tham số cho Cart
 export type TabsStackParams = {
   Home: undefined;
-  Cart: undefined;
+  Cart?: {
+    _id?: string;
+    images?: [string];
+    name?: string;
+    price?: number;
+    color?: string;
+    size?: string;
+    quantity: number;
+  };
   Payment: undefined;
   Profile: undefined;
 };
@@ -24,6 +33,7 @@ export type TabsStackScreenProps<T extends keyof TabsStackParams> =
     BottomTabScreenProps<TabsStackParams, T>,
     RootStackScreenProps<"TabsStack">
   >;
+
 const TabsNavigator = () => {
   return (
     <TabsStack.Navigator screenOptions={{ tabBarShowLabel: false }}>

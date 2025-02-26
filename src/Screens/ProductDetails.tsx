@@ -4,15 +4,54 @@ import {
 import React from 'react';
 import { RootStackScreenProps } from '../Navigation/RootNavigator';
 import { HeadersComponent } from '../Components/HeaderComponents/HeaderComponent';
+import DisplayMessage from '../Components/ProductDetails/DisplayMessage';
 import { AntDesign, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { CartState } from '../TypesCheck/productCartTypes';
+import { ProductListParams } from '../TypesCheck/HomeProps';
+import { addToCart } from '../redux/CartReducer';
 
 const { width, height } = Dimensions.get("window");
 
 const ProductDetails = ({ navigation, route }: RootStackScreenProps<"productDetails">) => {
     const { _id, images, name, price, oldPrice, inStock, color, size, description, quantity } = route.params;
 
+    const cart = useSelector((state: CartState) => state.cart.cart);
+    const dispatch = useDispatch();
+
+    const [addedToCart, setAddedToCart] = React.useState(false);
+    const [message, setMessage] = React.useState("");
+    const [displayMessage, setDisplayMessage] = React.useState<boolean>(false);
+
+    const addItemToCart = (ProductItemObj: ProductListParams) => {
+        if (ProductItemObj.quantity <= 0) {
+            setMessage("Product is out of stock.");
+            setDisplayMessage(true);
+            setTimeout(() => setDisplayMessage(false), 3000);
+        } else {
+            const findItem = cart.find((product) => product._id === _id);
+            if (findItem) {
+                setMessage("Product is already in cart.");
+                setDisplayMessage(true);
+                setTimeout(() => setDisplayMessage(false), 3000);
+            } else {
+                setAddedToCart(!addedToCart);
+                dispatch(addToCart(ProductItemObj));
+                setMessage("Product added to cart successfully.");
+                setDisplayMessage(true);
+                setTimeout(() => setDisplayMessage(false), 3000);
+            }
+        }
+    };
+
     const gotoCartScreen = () => {
-        navigation.navigate("Cart");
+        if (cart.length === 0) {
+            setMessage("Cart is empty. Please add products to cart.");
+            setDisplayMessage(true);
+            setTimeout(() => setDisplayMessage(false), 3000);
+        } else {
+            navigation.navigate("TabsStack", { screen: "Cart" });
+        }
     };
 
     const goToPreviousScreen = () => {
@@ -27,7 +66,11 @@ const ProductDetails = ({ navigation, route }: RootStackScreenProps<"productDeta
 
     return (
         <SafeAreaView style={{ paddingTop: Platform.OS === 'android' ? 20 : 0, flex: 1, backgroundColor: "white" }}>
-            <HeadersComponent gotoCartScreen={gotoCartScreen} gotoPrevious={goToPreviousScreen} />
+
+            {/* ✅ Thêm DisplayMessage trước HeadersComponent */}
+            {displayMessage && <DisplayMessage message={message} visible={() => setDisplayMessage(!displayMessage)} />}
+
+            <HeadersComponent gotoCartScreen={gotoCartScreen} cartLength={cart.length} gotoPrevious={goToPreviousScreen} />
 
             <ScrollView style={{ backgroundColor: "pink" }}>
                 <ScrollView showsVerticalScrollIndicator={false}>
@@ -63,35 +106,6 @@ const ProductDetails = ({ navigation, route }: RootStackScreenProps<"productDeta
                         </View>
                     </ImageBackground>
                 </ScrollView>
-
-                <View style={{
-                    backgroundColor: "white", borderColor: "purple", borderWidth: 8, width,
-                    position: "absolute", top: 420, padding: 10
-                }}>
-                    <Text style={{ fontSize: 20, fontWeight: "bold" }}>{name}</Text>
-                    <Text style={{ fontSize: 16, color: "green" }}>{description}</Text>
-                    <Text style={{ fontSize: 20, fontWeight: "bold" }}>Price: {price} $</Text>
-                    <Text style={{ fontSize: 16, color: "grey" }}>Old Price: {oldPrice} $</Text>
-                    <Text style={{ fontSize: 16, color: "blue" }}>
-                        {quantity > 0 ? `In Stock - Quantity: ${quantity}` : "Out of Stock"}
-                    </Text>
-                    <Text style={{ fontSize: 16, color: "orange" }}>Color: {color}</Text>
-                    <Text style={{ fontSize: 16, color: "red" }}>Size: {size}</Text>
-                </View>
-
-                <View style={{ marginTop: 220, marginHorizontal: 6 }}>
-                    <Text style={{ fontSize: 16, fontWeight: "bold", color: "blue" }}>Delivery</Text>
-                </View>
-
-                <View style={{ backgroundColor: "white", borderColor: "orange", borderWidth: 8, width, padding: 10 }}>
-                    <Text style={{ fontSize: 14, color: "red" }}>Delivery is Available</Text>
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <Ionicons name='location-sharp' size={25} color="green" />
-                        <Text style={{ fontSize: 14, color: "brown", marginLeft: 5 }}>
-                            Delivery to: CAMPUS THANH THAI 7/1 Thanh Thai, Ward 14, District 10, Ho Chi Minh City
-                        </Text>
-                    </View>
-                </View>
             </ScrollView>
 
             <View style={{ backgroundColor: "white", paddingBottom: 0 }}>
@@ -100,13 +114,14 @@ const ProductDetails = ({ navigation, route }: RootStackScreenProps<"productDeta
                         backgroundColor: "green", padding: 15, alignItems: "center",
                         justifyContent: "center", borderRadius: 10, margin: 10
                     }}
-                    onPress={() => Alert.alert("Add to Cart", "Product added to cart successfully.")}
+                    onPress={() => addItemToCart(route.params)}
                 >
-                    <Text style={{ color: "yellow", fontSize: 20, fontWeight: "bold" }}>
+                    <Text style={{ color: addedToCart ? "violet" : "orange", fontSize: 20, fontWeight: "bold" }}>
                         Add to Cart
                     </Text>
                 </Pressable>
             </View>
+
         </SafeAreaView>
     );
 };
