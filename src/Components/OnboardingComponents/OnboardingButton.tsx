@@ -6,7 +6,7 @@ import {
   StyleSheet,
 } from "react-native";
 import React from "react";
-import { OnBoardingButtonParams } from "../../TypesCheck/OnBoardingTypesCheck";
+import { OnBoardingButtonParams } from "../../TypesCheck/OnboardingTypesCheck";
 import Animated, {
   interpolateColor,
   useAnimatedStyle,

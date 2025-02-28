@@ -15,6 +15,21 @@ const UserAuth = ({ navigation, route }: RootStackScreenProps<"UserLogin">) => {
         password: ""
     });
 
+    const [userSignupForm, setUserSignupForm] = useState({
+        username: "",
+        email: "",
+        password: ""
+    });
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showRegistrationScreen, setShowRegistrationScreen] = useState(false);
+
+    const userRegistrationParams = {
+        username: "",
+        email: "",
+        password: ""
+    };
+
     const SubmitUserLoginForm = (userLoginParams?: any) => {
         axios
             .post("http://10.0.2.2:9000/user/loginUser", userLoginParams)
@@ -29,6 +44,28 @@ const UserAuth = ({ navigation, route }: RootStackScreenProps<"UserLogin">) => {
                 Alert.alert("Login Error", err.message);
                 console.log(err);
             });
+    };
+
+    const SubmitRegistrationForm = () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+
+        axios
+            .post("http://10.0.2.2:9000/user/registerUser", userSignupForm)
+            .then((response) => {
+                console.log(response);
+                Alert.alert("User Registration Completed Successfully");
+                setShowRegistrationScreen(false);
+                setUserSignupForm(userRegistrationParams);
+            })
+            .catch((err) => {
+                console.log(err.request); // Logs request details
+                console.log(err.response); // Logs response details (if any)
+                const errorMessage =
+                    err.response?.data?.message || "An unexpected error occurred";
+                Alert.alert("Registration Error", errorMessage);
+            })
+            .finally(() => setIsSubmitting(false)); // Re-enable the button
     };
 
     return (
