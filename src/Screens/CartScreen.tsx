@@ -1,18 +1,23 @@
-import { View, Text, Platform, Alert } from "react-native";
-import React from "react";
+import { View, Text, Platform, Alert, Pressable } from "react-native";
+import React, { useContext, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeadersComponent } from "../Components/HeaderComponents/HeaderComponent";
 import { TabsStackScreenProps } from "../Navigation/TabsNavigation";
 import { useSelector } from "react-redux";
 import { CartState } from "../TypesCheck/productCartTypes";
 import DisplayMessage from "../Components/ProductDetails/DisplayMessage";
+import { UserType } from "../Components/LoginRegisterComponents/UserContext";
 
+// ✅ Bổ sung useContext để lấy thông tin user
 const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
   const cart = useSelector((state: CartState) => state.cart.cart);
 
   // ✅ Thêm state `message` và `displayMessage`
-  const [message, setMessage] = React.useState("");
-  const [displayMessage, setDisplayMessage] = React.useState<boolean>(false);
+  const [message, setMessage] = useState("");
+  const [displayMessage, setDisplayMessage] = useState<boolean>(false);
+
+  // ✅ Lấy thông tin user từ context
+  const { getUserId, setGetUserId } = useContext(UserType);
 
   // ✅ Hàm điều hướng đến giỏ hàng
   const gotoCartScreen = () => {
@@ -37,6 +42,20 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
     }
   };
 
+  // ✅ Hàm xử lý mua hàng
+  const proceed = () => {
+    if (getUserId === "") {
+      navigation.navigate("UserLogin", { screenTitle: "User Authentication" });
+    } else {
+      if (cart.length === 0) {
+        navigation.navigate("TabsStack", { screen: "Home" });
+      } else {
+        // Xử lý thanh toán ở đây...
+        Alert.alert("Proceeding with checkout...");
+      }
+    }
+  };
+
   // ✅ Nhận params từ navigation
   const { _id, images, name, price, color, size, quantity } = route.params || {};
 
@@ -52,7 +71,11 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
       {displayMessage && <DisplayMessage message={message} visible={() => setDisplayMessage(!displayMessage)} />}
 
       {/* ✅ Truyền thêm `gotoCartScreen` và `goToPreviousScreen` */}
-      <HeadersComponent gotoCartScreen={gotoCartScreen} cartLength={cart.length} gotoPrevious={goToPreviousScreen} />
+      <HeadersComponent
+        gotoCartScreen={gotoCartScreen}
+        cartLength={cart.length}
+        gotoPrevious={goToPreviousScreen}
+      />
 
       {/* ✅ Hiển thị thông tin sản phẩm nếu có */}
       {name ? (
@@ -68,6 +91,24 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
           Giỏ hàng trống
         </Text>
       )}
+
+      {/* ✅ Nút bấm thanh toán */}
+      <Pressable
+        onPress={proceed}
+        style={{
+          backgroundColor: "#FFC72C",
+          padding: 10,
+          borderRadius: 5,
+          justifyContent: "center",
+          alignItems: "center",
+          marginHorizontal: 10,
+          marginTop: 10,
+        }}
+      >
+        <Text style={{ fontSize: 28, fontWeight: "bold", color: "purple" }}>
+          Click to buy ({cart.length})
+        </Text>
+      </Pressable>
     </SafeAreaView>
   );
 };

@@ -4,17 +4,27 @@ import { Entypo, AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons"
 import { GoBack } from "./GoBackButton";
 
 interface IHeaderParams {
+    pageTitle?: string; // Thêm thuộc tính pageTitle từ hình ảnh
     gotoPrevious?: () => void;
     search?: () => void;
     cartLength?: number;
     gotoCartScreen?: () => void;
 }
 
-export const HeadersComponent = ({ gotoPrevious, search, cartLength, gotoCartScreen }: IHeaderParams) => {
+export const HeadersComponent = ({ pageTitle, gotoPrevious, search, cartLength, gotoCartScreen }: IHeaderParams) => {
     const [searchInput, setSearchInput] = useState("")
+
     return (
         <View style={{ backgroundColor: "#000", padding: 10, flexDirection: "row", alignItems: "center" }}>
             <GoBack onPress={gotoPrevious} />
+
+            {/* Hiển thị tiêu đề trang nếu có */}
+            {pageTitle && (
+                <Text style={{ color: "white", fontSize: 18, fontWeight: "bold", marginLeft: 10 }}>
+                    {pageTitle}
+                </Text>
+            )}
+
             <Pressable style={{
                 flexDirection: "row", alignItems: "center", marginHorizontal: 7,
                 gap: 10, backgroundColor: "white", borderRadius: 10, height: 38, flex: 1
@@ -22,8 +32,9 @@ export const HeadersComponent = ({ gotoPrevious, search, cartLength, gotoCartScr
                 <Pressable style={{ padding: 10 }} onPress={search}>
                     <AntDesign name="search1" size={20} color={"blue"} />
                 </Pressable>
-                <TextInput value={searchInput} onChangeText={setSearchInput} placeholder="search Items ..." />
+                <TextInput value={searchInput} onChangeText={setSearchInput} placeholder="Search items..." />
             </Pressable>
+
             <Pressable onPress={gotoCartScreen}>
                 <View style={styles.cartNum}>
                     <Text style={{ color: "pink" }}>

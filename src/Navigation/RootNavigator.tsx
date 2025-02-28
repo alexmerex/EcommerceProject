@@ -4,10 +4,11 @@ import {
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
 import { NavigatorScreenParams } from "@react-navigation/native";
-import OnBoardingScreen from "../Screens/OnBoardingScreen";
+import OnBoardingScreen from "../Screens/OnboardingScreen";
 import TabsNavigator, { TabsStackParams } from "./TabsNavigation";
 import ProductDetails from "../Screens/ProductDetails";
 import CartScreen from "../Screens/CartScreen";
+import UserAuth from "../Screens/LoginRegisterScreen";
 
 // Định nghĩa kiểu dữ liệu cho RootStackParams
 export type RootStackParams = {
@@ -15,7 +16,7 @@ export type RootStackParams = {
   TabsStack: NavigatorScreenParams<TabsStackParams>;
   Deals: undefined;
   Profile: undefined;
-  Cart: { // Cập nhật kiểu dữ liệu của Cart
+  Cart: {
     _id: string;
     images: [string];
     name: string;
@@ -24,7 +25,7 @@ export type RootStackParams = {
     size?: string;
     quantity: number;
   };
-  productDetails: { // Cập nhật kiểu dữ liệu của productDetails
+  productDetails: {
     _id: string;
     images: [string];
     name: string;
@@ -35,6 +36,17 @@ export type RootStackParams = {
     size?: string;
     description?: string;
     quantity: number;
+  };
+
+  // Thêm UserLogin vào RootStackParams
+  UserLogin: {
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    firstName?: string;
+    lastName?: string;
+    mobileNo?: string;
+    screenTitle?: string;
   };
 };
 
@@ -65,6 +77,11 @@ const RootNavigator = () => {
       <RootStack.Screen
         name="Cart"
         component={CartScreen}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="UserLogin"
+        component={UserAuth}
         options={{ headerShown: false }}
       />
     </RootStack.Navigator>

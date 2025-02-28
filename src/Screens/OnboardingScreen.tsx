@@ -1,61 +1,62 @@
-import { View, Text, ViewToken } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useCallback, useRef } from "react";
+import { View, SafeAreaView, ViewToken } from "react-native";
 import { RootStackScreenProps } from "../Navigation/RootNavigator";
-import { OnBoardingPrograms } from "../TypesCheck/OnBoardingTypesCheck";
+import { OnBoardingPrograms } from "../TypesCheck/OnboardingTypesCheck";
 import { OnBoardingData } from "../Data/EcommerceAppData";
 import Animated, {
-  useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue,
+  useAnimatedRef,
 } from "react-native-reanimated";
-import OnBoardingItems from "../Components/OnBoardingComponents/OnBoardingItems";
-import { FlatList } from "react-native-reanimated/lib/typescript/Animated";
-import OnBoardingPagination from "../Components/OnBoardingComponents/OnBoardingPagination";
-import OnBoardingButton from "../Components/OnBoardingComponents/OnBoardingButton";
-type Props = {};
+
+import OnBoardingItems from "../Components/OnboardingComponents/OnboardingItems";
+import OnBoardingPagination from "../Components/OnboardingComponents/OnBoardingPagination";
+import OnboardingButton from "../Components/OnboardingComponents/OnboardingButton";
 
 const OnBoardingScreen = ({
   navigation,
   route,
 }: RootStackScreenProps<"OnBoardingScreen">) => {
-  const [onBoardingItems, setOnBoardingItems] =
-    useState<OnBoardingPrograms[]>(OnBoardingData);
-  const flatListRef = useAnimatedRef<FlatList<OnBoardingPrograms>>();
+  const [onBoardingItems] = useState<OnBoardingPrograms[]>(OnBoardingData);
+
+  // ✅ Use useAnimatedRef with Animated.FlatList
+  const flatListRef = useAnimatedRef<Animated.FlatList<OnBoardingPrograms>>();
+
   const x = useSharedValue(0);
   const flatListIndex = useSharedValue(0);
+  const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 });
+
   const onScrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       x.value = event.contentOffset.x;
     },
   });
-  const onViewableItemsChanged = ({
-    viewableItems,
-  }: {
-    viewableItems: ViewToken[];
-  }) => {
-    if (viewableItems[0].index !== null) {
-      flatListIndex.value = viewableItems[0].index;
-    }
-  };
+
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+        flatListIndex.value = viewableItems[0].index;
+      }
+    },
+    []
+  );
+
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Animated.FlatList
-        ref={flatListRef}
+        ref={flatListRef} // ✅ Fix: Ensure ref type matches Animated.FlatList
         onScroll={onScrollHandler}
         data={onBoardingItems}
-        renderItem={({ item, index }) => (
+        renderItem={({ item, index }: { item: OnBoardingPrograms; index: number }) => (
           <OnBoardingItems item={item} index={index} x={x} />
         )}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item: OnBoardingPrograms) => item._id}
         scrollEventThrottle={17}
         horizontal
         showsHorizontalScrollIndicator={false}
         pagingEnabled
         onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{
-          minimumViewTime: 300,
-          viewAreaCoveragePercentThreshold: 10,
-        }}
+        viewabilityConfig={viewabilityConfig.current}
       />
       <View
         style={{
@@ -67,17 +68,18 @@ const OnBoardingScreen = ({
           alignItems: "center",
           marginHorizontal: 30,
           paddingVertical: 30,
+          width: "100%",
         }}
       >
-        <OnBoardingPagination item={onBoardingItems} x={x} />
-        <OnBoardingButton
+        <OnBoardingPagination data={onBoardingItems} x={x} />
+        <OnboardingButton
           x={x}
-          itemLength={OnBoardingItems.length}
+          itemLength={onBoardingItems.length}
           flatListRef={flatListRef}
           flatListIndex={flatListIndex}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

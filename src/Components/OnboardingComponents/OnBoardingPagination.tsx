@@ -1,16 +1,19 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import React from "react";
-import { OnBoardingPaginationParams } from "../../TypesCheck/OnBoardingTypesCheck";
+import { OnBoardingPrograms } from "../../TypesCheck/OnboardingTypesCheck";
 import OnBoardingDots from "./OnBoardingDots";
 
-type Props = {};
+type OnBoardingPaginationParams = {
+  data: OnBoardingPrograms[]; // ✅ Changed from `item` to `data`
+  x: any;
+};
 
-const OnBoardingPagination = ({ item, x }: OnBoardingPaginationParams) => {
+const OnBoardingPagination: React.FC<OnBoardingPaginationParams> = ({ data, x }) => {
   return (
     <View style={sty.paginationContainer}>
-      {item.map((_, index) => {
-        return <OnBoardingDots index={index} x={x} key={index} />;
-      })}
+      {data.map((_, index) => (
+        <OnBoardingDots index={index} x={x} key={index} />
+      ))}
     </View>
   );
 };
