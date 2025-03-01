@@ -1,6 +1,6 @@
 export interface ProductListParams {
-    idProduct: string; // Thêm idProduct
-    _id?: string; // Để phòng trường hợp API trả về _id
+    idProduct: number; // Change to number if IDs are numerical
+    _id?: string; // Keep for MongoDB compatibility
     images: string[];
     name: string;
     price: number;
@@ -14,12 +14,11 @@ export interface ProductListParams {
     category?: string;
 }
 
-
-export interface CartItem {
-    item: ProductListParams; // Đổi `cart` thành `item` để rõ ràng hơn
+export interface CartItem extends ProductListParams {
+    quantity: number; // Ensure each cart item has a quantity
 }
 
 export interface CartState {
-    cart: ProductListParams[]; // Loại bỏ lồng nhau không cần thiết
+    cart: CartItem[]; // Store cart items directly
     length: number;
 }

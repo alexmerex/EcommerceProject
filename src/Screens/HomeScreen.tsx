@@ -16,7 +16,7 @@ import ProductDetails from "../Screens/ProductDetails"; // Đảm bảo rằng b
 
 
 const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
-  const cart = useSelector((state: CartState) => state.cart.cart);
+  const cart = useSelector((state: { cart: CartState }) => state.cart);
   const [message, setMessage] = useState("");
   const [displayMessage, setDisplayMessage] = useState<boolean>(false);
   const [getCategory, setGetCategory] = useState<ProductListParams[]>([]);
@@ -103,14 +103,7 @@ const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
             getProductsByCatID.map((item, index) => (
               <CategoryCard
                 key={index}
-                item={{
-                  ...item,
-                  oldPrice: item.oldPrice ?? 0,
-                  description: item.description ?? "",
-                  inStock: item.inStock ?? false,
-                  isFeatured: item.isFeatured ?? false,
-                  category: item.category ?? "",
-                }}
+                item={{ name: item.name, images: item.images, _id: item._id }}
                 catStyleProps={styles.productCard}
                 catProps={{ onPress: () => navigation.navigate("productDetails", item) }}
               />

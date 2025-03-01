@@ -1,79 +1,181 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
-    View, Text, SafeAreaView, ScrollView, Platform, Pressable, Alert,
-    KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard
+    View, Text, SafeAreaView, TextInput, TouchableOpacity,
+    KeyboardAvoidingView, Alert, StyleSheet, ScrollView
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RootStackScreenProps } from "../Navigation/RootNavigator";
-import { HeadersComponent } from "../Components/HeaderComponents/HeaderComponent";
-import { UserType } from "../Components/LoginRegisterComponents/UserContext";
 
-const UserAuth = ({ navigation, route }: RootStackScreenProps<"UserLogin">) => {
-    const [userLoginForm, setUserLoginForm] = useState({
-        email: "",
-        password: ""
-    });
-
-    const [userSignupForm, setUserSignupForm] = useState({
-        username: "",
-        email: "",
-        password: ""
-    });
-
+const UserAuth = ({ navigation }: RootStackScreenProps<"UserLogin">) => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [username, setUsername] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [showRegistrationScreen, setShowRegistrationScreen] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
+    const [isRegisterMode, setIsRegisterMode] = useState(false); // 🔥 Fix lỗi
 
-    const userRegistrationParams = {
-        username: "",
-        email: "",
-        password: ""
+    // 📌 Chuyển giữa đăng nhập & đăng ký
+    const toggleAuthMode = () => {
+        setIsRegisterMode(!isRegisterMode);
+        setIsRegistering(false); // 🔥 Đặt lại trạng thái để tránh nút bị treo
+        setIsSubmitting(false);
+        setEmail("");
+        setPassword("");
+        setUsername("");
     };
 
-    const SubmitUserLoginForm = (userLoginParams?: any) => {
-        axios
-            .post("http://10.0.2.2:9000/user/loginUser", userLoginParams)
-            .then((response) => {
-                console.log(response);
-                const token = response.data.token;
-                AsyncStorage.setItem("authToken", token);
-                Alert.alert("Login Successfully!");
-                navigation.navigate("TabsStack", { screen: "Cart" });
-            })
-            .catch((err) => {
-                Alert.alert("Login Error", err.message);
-                console.log(err);
-            });
-    };
-
-    const SubmitRegistrationForm = () => {
-        if (isSubmitting) return;
+    // 📌 Đăng nhập
+    const handleLogin = async () => {
+        if (!email.trim() || !password.trim()) {
+            Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
+            return;
+        }
         setIsSubmitting(true);
 
-        axios
-            .post("http://10.0.2.2:9000/user/registerUser", userSignupForm)
-            .then((response) => {
-                console.log(response);
-                Alert.alert("User Registration Completed Successfully");
-                setShowRegistrationScreen(false);
-                setUserSignupForm(userRegistrationParams);
-            })
-            .catch((err) => {
-                console.log(err.request); // Logs request details
-                console.log(err.response); // Logs response details (if any)
-                const errorMessage =
-                    err.response?.data?.message || "An unexpected error occurred";
-                Alert.alert("Registration Error", errorMessage);
-            })
-            .finally(() => setIsSubmitting(false)); // Re-enable the button
+        try {
+            const response = await axios.post("http://192.168.100.202:9000/user/loginUser", { email, password });
+            const token = response.data.token;
+            await AsyncStorage.setItem("authToken", token);
+            Alert.alert("Đăng nhập thành công!");
+            navigation.navigate("TabsStack", { screen: "Cart" });
+        } catch (error) {
+            Alert.alert("Lỗi đăng nhập", error.response?.data?.message || "Có lỗi xảy ra");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // 📌 Đăng ký
+    const handleRegister = async () => {
+        if (!username.trim() || !email.trim() || !password.trim()) {
+            Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin đăng ký");
+            return;
+        }
+        setIsRegistering(true);
+
+        try {
+            const response = await axios.post("http://192.168.100.202:9000/user/registerUser", { username, email, password });
+
+            if (response.status === 201 || response.status === 200) {
+                Alert.alert("Đăng ký thành công!", "Bạn có thể đăng nhập ngay bây giờ");
+                setUsername("");
+                setEmail("");
+                setPassword("");
+                setIsRegistering(false);
+                setIsRegisterMode(false); // 🔥 Quay về trang đăng nhập
+            }
+        } catch (error) {
+            Alert.alert("Lỗi đăng ký", error.response?.data?.message || "Có lỗi xảy ra");
+        } finally {
+            setIsRegistering(false);
+        }
     };
 
     return (
-        <SafeAreaView>
-            <Text>User Login Screen</Text>
-            {/* Thêm form nhập email, password */}
+        <SafeAreaView style={styles.container}>
+            <KeyboardAvoidingView behavior="padding" style={styles.innerContainer}>
+                <ScrollView>
+                    <Text style={styles.title}>{isRegisterMode ? "Đăng Ký" : "Đăng Nhập"}</Text>
+
+                    {isRegisterMode && (
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Tên đăng nhập"
+                            value={username}
+                            onChangeText={setUsername}
+                        />
+                    )}
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Email"
+                        keyboardType="email-address"
+                        value={email}
+                        onChangeText={setEmail}
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Mật khẩu"
+                        secureTextEntry
+                        value={password}
+                        onChangeText={setPassword}
+                    />
+
+                    {isRegisterMode ? (
+                        <TouchableOpacity
+                            style={[styles.button, isRegistering && styles.buttonDisabled]}
+                            onPress={handleRegister}
+                            disabled={isRegistering}
+                        >
+                            <Text style={styles.buttonText}>{isRegistering ? "Đang xử lý..." : "Đăng ký"}</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            style={[styles.button, isSubmitting && styles.buttonDisabled]}
+                            onPress={handleLogin}
+                            disabled={isSubmitting}
+                        >
+                            <Text style={styles.buttonText}>{isSubmitting ? "Đang xử lý..." : "Đăng nhập"}</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    <TouchableOpacity onPress={toggleAuthMode}>
+                        <Text style={styles.switchText}>
+                            {isRegisterMode ? "Đã có tài khoản? Đăng nhập" : "Chưa có tài khoản? Đăng ký ngay"}
+                        </Text>
+                    </TouchableOpacity>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f9f9f9"
+    },
+    innerContainer: {
+        width: "80%",
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        textAlign: "center",
+        marginBottom: 20,
+    },
+    input: {
+        width: "100%",
+        height: 50,
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        marginBottom: 15,
+        backgroundColor: "#fff"
+    },
+    button: {
+        backgroundColor: "#007bff",
+        padding: 15,
+        borderRadius: 8,
+        alignItems: "center"
+    },
+    buttonDisabled: {
+        backgroundColor: "#ccc"
+    },
+    buttonText: {
+        color: "white",
+        fontWeight: "bold",
+        fontSize: 16
+    },
+    switchText: {
+        textAlign: "center",
+        marginTop: 15,
+        color: "#007bff",
+        fontWeight: "bold"
+    }
+});
 
 export default UserAuth;
