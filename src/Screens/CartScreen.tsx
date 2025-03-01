@@ -12,6 +12,9 @@ import { UserType } from "../Components/LoginRegisterComponents/UserContext";
 const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
   const cart = useSelector((state: CartState) => state.cart.cart);
 
+  // ✅ Hiển thị thông tin giỏ hàng trên console
+  console.log("Cart Items:", cart);
+
   // ✅ Thêm state `message` và `displayMessage`
   const [message, setMessage] = useState("");
   const [displayMessage, setDisplayMessage] = useState<boolean>(false);
@@ -38,7 +41,7 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
       navigation.goBack();
     } else {
       console.log("Không thể quay lại, chuyển về trang Home.");
-      navigation.navigate("Home"); // Điều hướng fallback nếu không quay lại được
+      navigation.navigate("Home");
     }
   };
 
@@ -50,14 +53,10 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
       if (cart.length === 0) {
         navigation.navigate("TabsStack", { screen: "Home" });
       } else {
-        // Xử lý thanh toán ở đây...
         Alert.alert("Proceeding with checkout...");
       }
     }
   };
-
-  // ✅ Nhận params từ navigation
-  const { _id, images, name, price, color, size, quantity } = route.params || {};
 
   return (
     <SafeAreaView
@@ -71,25 +70,23 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
       {displayMessage && <DisplayMessage message={message} visible={() => setDisplayMessage(!displayMessage)} />}
 
       {/* ✅ Truyền thêm `gotoCartScreen` và `goToPreviousScreen` */}
-      <HeadersComponent
-        gotoCartScreen={gotoCartScreen}
-        cartLength={cart.length}
-        gotoPrevious={goToPreviousScreen}
-      />
+      <HeadersComponent gotoCartScreen={gotoCartScreen} cartLength={cart.length} gotoPrevious={goToPreviousScreen} />
 
       {/* ✅ Hiển thị thông tin sản phẩm nếu có */}
-      {name ? (
+      {cart.length > 0 ? (
         <View style={{ padding: 20 }}>
-          <Text style={{ color: "white", fontSize: 18 }}>Tên sản phẩm: {name}</Text>
-          <Text style={{ color: "white", fontSize: 16 }}>Giá: ${price}</Text>
-          <Text style={{ color: "white", fontSize: 16 }}>Màu: {color}</Text>
-          <Text style={{ color: "white", fontSize: 16 }}>Size: {size}</Text>
-          <Text style={{ color: "white", fontSize: 16 }}>Số lượng: {quantity}</Text>
+          {cart.map((item, index) => (
+            <View key={index} style={{ marginBottom: 10 }}>
+              <Text style={{ color: "white", fontSize: 18 }}>Tên sản phẩm: {item.name}</Text>
+              <Text style={{ color: "white", fontSize: 16 }}>Giá: ${item.price}</Text>
+              <Text style={{ color: "white", fontSize: 16 }}>Màu: {item.color}</Text>
+              <Text style={{ color: "white", fontSize: 16 }}>Size: {item.size}</Text>
+              <Text style={{ color: "white", fontSize: 16 }}>Số lượng: {item.quantity}</Text>
+            </View>
+          ))}
         </View>
       ) : (
-        <Text style={{ color: "white", textAlign: "center", marginTop: 20 }}>
-          Giỏ hàng trống
-        </Text>
+        <Text style={{ color: "white", textAlign: "center", marginTop: 20 }}>Giỏ hàng trống</Text>
       )}
 
       {/* ✅ Nút bấm thanh toán */}

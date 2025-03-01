@@ -1,4 +1,4 @@
-import { OnBoardingPrograms } from "../TypesCheck/OnBoardingTypesCheck";
+import { OnBoardingPrograms } from "../TypesCheck/OnboardingTypesCheck";
 
 export const OnBoardingData: OnBoardingPrograms[] = [
   {

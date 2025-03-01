@@ -5,7 +5,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
 } from "react-native-reanimated";
-import { OnBoardingItemsObj } from "../../TypesCheck/OnBoardingTypesCheck";
+import { OnBoardingItemsObj } from "../../TypesCheck/OnboardingTypesCheck";
 import LottieView from "lottie-react-native";
 
 type Props = {};

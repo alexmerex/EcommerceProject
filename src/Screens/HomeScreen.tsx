@@ -1,4 +1,4 @@
-import { View, Text, Platform, ScrollView, Alert } from "react-native";
+import { View, Text, Platform, ScrollView, Alert, StyleSheet, TextInput } from "react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import { TabsStackScreenProps } from "../Navigation/TabsNavigation";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,14 +12,17 @@ import { ProductCard } from "../Components/HomeScreenComponents/ProductCard";
 import { useSelector } from "react-redux";
 import { CartState } from "../TypesCheck/productCartTypes";
 import DisplayMessage from "../Components/ProductDetails/DisplayMessage";
+import ProductDetails from "../Screens/ProductDetails"; // Đảm bảo rằng bạn đã có màn hình ProductDetails
 
-// ✅ Cập nhật nhận thêm `route`
+
 const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
   const cart = useSelector((state: CartState) => state.cart.cart);
-
-  // ✅ Thêm state `message` và `displayMessage`
-  const [message, setMessage] = React.useState("");
-  const [displayMessage, setDisplayMessage] = React.useState<boolean>(false);
+  const [message, setMessage] = useState("");
+  const [displayMessage, setDisplayMessage] = useState<boolean>(false);
+  const [getCategory, setGetCategory] = useState<ProductListParams[]>([]);
+  const [getProductsByCatID, setGetProductsByCatID] = useState<ProductListParams[]>([]);
+  const [activeCat, setActiveCat] = useState<string>("");
+  const [trendingProducts, setTrendingProducts] = useState<ProductListParams[]>([]);
 
   const gotoCartScreen = () => {
     if (cart.length === 0) {
@@ -36,18 +39,6 @@ const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
       navigation.navigate("OnBoardingScreen");
     }
   };
-
-  const sliderImages = [
-    "https://gomsuhcm.com/wp-content/uploads/2023/12/Tho-tet-2-cau-hai-huoc-cho-nam-2024.jpg",
-    "https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2023/10/tho-chuc-tet-hai-huoc-thumbnail.jpg",
-    "https://i.ytimg.com/vi/OvUoIzf0lQc/maxresdefault.jpg",
-    "https://bizweb.dktcdn.net/thumb/1024x1024/100/408/770/products/d373f758-620f-4da0-b31e-6c993c0195fe.jpg",
-  ];
-
-  const [getCategory, setGetCategory] = useState<ProductListParams[]>([]);
-  const [getProductsByCatID, setGetProductsByCatID] = useState<ProductListParams[]>([]);
-  const [activeCat, setActiveCat] = useState<string>("");
-  const [trendingProducts, setTrendingProducts] = useState<ProductListParams[]>([]);
 
   useEffect(() => {
     fetchCategories({ setGetCategory });
@@ -70,47 +61,72 @@ const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
   );
 
   return (
-    <SafeAreaView style={{ paddingTop: Platform.OS === "android" ? 40 : 0, flex: 1, backgroundColor: "black" }}>
-      {/* ✅ Hiển thị thông báo nếu `displayMessage` = true */}
+    <SafeAreaView style={styles.safeArea}>
       {displayMessage && <DisplayMessage message={message} visible={() => setDisplayMessage(!displayMessage)} />}
 
-      {/* ✅ Cập nhật `HeadersComponent` để truyền thêm `cartLength` */}
-      <HeadersComponent gotoCartScreen={gotoCartScreen} cartLength={cart.length} gotoPrevious={goToPreviousScreen} />
+      {/* Header with Search and Cart */}
+      <View style={styles.header}>
+        <TextInput style={styles.searchInput} placeholder="search Items ..." placeholderTextColor="white" />
+        <Text onPress={gotoCartScreen} style={styles.cartIcon}>🛒</Text>
+      </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ backgroundColor: "#efg" }}>
-        <ImageSlider images={sliderImages} />
+      {/* Image Slider */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imageSliderContainer}>
+        <ImageSlider images={[
+          "https://gomsuhcm.com/wp-content/uploads/2023/12/Tho-tet-2-cau-hai-huoc-cho-nam-2024.jpg",
+          "https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2023/10/tho-chuc-tet-hai-huoc-thumbnail.jpg",
+          "https://i.ytimg.com/vi/OvUoIzf0lQc/maxresdefault.jpg",
+          "https://bizweb.dktcdn.net/thumb/1024x1024/100/408/770/products/d373f758-620f-4da0-b31e-6c993c0195fe.jpg"
+        ]} />
       </ScrollView>
 
-      <View style={{ backgroundColor: "yellow", flex: 1 }}>
-        <Text>Hello</Text>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 15 }} style={{ marginTop: 4 }}>
+      {/* Categories Section */}
+      <View style={styles.categoriesContainer}>
+        <Text style={styles.categoriesTitle}>Categories</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryScroll}>
           {getCategory.map((item, index) => (
             <CategoryCard
               key={index}
               item={{ name: item.name, images: item.images, _id: item._id }}
-              catStyleProps={{
-                height: 50,
-                width: 55,
-                radius: 20,
-                resizeMode: "contain",
-              }}
-              catProps={{
-                activeCat: activeCat,
-                onPress: () => setActiveCat(item._id),
-              }}
+              catStyleProps={styles.categoryCard}
+              catProps={{ activeCat, onPress: () => setActiveCat(item._id) }}
             />
           ))}
         </ScrollView>
+      </View>
 
-        <View style={{ backgroundColor: "purple", flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
-          <Text style={{ color: "yellow", fontSize: 14, fontWeight: "bold", padding: 10 }}>Trending Deals of the Week</Text>
-        </View>
+      {/* Products from Selected Category */}
+      <View style={styles.productSection}>
+        <Text style={styles.sectionTitle}>Products from Selected Category</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productScroll}>
+          {getProductsByCatID.length > 0 ? (
+            getProductsByCatID.map((item, index) => (
+              <CategoryCard
+                key={index}
+                item={{
+                  ...item,
+                  oldPrice: item.oldPrice ?? 0,
+                  description: item.description ?? "",
+                  inStock: item.inStock ?? false,
+                  isFeatured: item.isFeatured ?? false,
+                  category: item.category ?? "",
+                }}
+                catStyleProps={styles.productCard}
+                catProps={{ onPress: () => navigation.navigate("productDetails", item) }}
+              />
+            ))
+          ) : (
+            <Text>No products available</Text>
+          )}
+        </ScrollView>
+      </View>
 
-        <View style={{ backgroundColor: "#fff", borderWidth: 7, borderColor: "green", flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", marginTop: 10 }}>
+      {/* Trending Deals Section */}
+      <View style={styles.trendingDealsSection}>
+        <Text style={styles.sectionTitle}>Trending Deals of the Week</Text>
+        <View style={styles.productListContainer}>
           {trendingProducts.map((item, index) => {
             const bgImg = item?.images?.length > 0 ? item.images[0] : "";
-
             return (
               <ProductCard
                 key={index}
@@ -122,7 +138,7 @@ const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
                   isFeatured: item.isFeatured ?? false,
                   category: item.category ?? "",
                 }}
-                pStyleProps={{ resizeMode: "contain", width: 100, height: 90, marginBottom: 5 }}
+                pStyleProps={styles.productCard}
                 productProps={{
                   imageBg: bgImg,
                   percentageWidth: 100,
@@ -136,5 +152,93 @@ const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    paddingTop: Platform.OS === "android" ? 40 : 0,
+    flex: 1,
+    backgroundColor: "black",
+  },
+  header: {
+    backgroundColor: "#333",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    justifyContent: "space-between",
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: "#555",
+    color: "white",
+    borderRadius: 20,
+    padding: 10,
+    marginRight: 10,
+  },
+  cartIcon: {
+    color: "white",
+    fontSize: 30,
+  },
+  imageSliderContainer: {
+    marginTop: 10,
+  },
+  categoriesContainer: {
+    marginTop: 20,
+    backgroundColor: "yellow",
+  },
+  categoriesTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 15,
+    marginBottom: 10,
+  },
+  categoryScroll: {
+    paddingHorizontal: 10,
+  },
+  categoryCard: {
+    height: 70,
+    width: 70,
+    borderRadius: 10,
+    resizeMode: "contain",
+  },
+  productSection: {
+    marginTop: 10,
+    backgroundColor: "pink",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 15,
+    marginVertical: 10,
+  },
+  productScroll: {
+    paddingHorizontal: 10,
+  },
+  productCard: {
+    height: 100,
+    width: 100,
+    borderRadius: 10,
+    margin: 5,
+  },
+  trendingDealsSection: {
+    marginTop: 10,
+    backgroundColor: "purple",
+  },
+  productListContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
+  bottomNavigation: {
+    backgroundColor: "#333",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    paddingVertical: 10,
+  },
+  navItem: {
+    color: "white",
+    fontSize: 20,
+  },
+});
 
 export default HomeScreen;

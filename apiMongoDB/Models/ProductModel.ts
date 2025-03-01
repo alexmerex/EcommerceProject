@@ -10,6 +10,7 @@ interface ProductDocument extends Document {
     inStock: boolean;
     isFeatured: boolean;
     category: mongoose.Schema.Types.ObjectId;
+    view: number;
 }
 
 const ProductSchema = new Schema<ProductDocument>({
@@ -51,6 +52,10 @@ const ProductSchema = new Schema<ProductDocument>({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category",
         required: true
+    },
+    view: {
+        type: Number,
+        default: 0,
     },
 }, { timestamps: true });
 

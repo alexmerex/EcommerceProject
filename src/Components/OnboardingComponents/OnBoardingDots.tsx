@@ -1,6 +1,6 @@
 import { View, Text, useWindowDimensions, StyleSheet } from "react-native";
 import React from "react";
-import { OnBoardingDotParams } from "../../TypesCheck/OnBoardingTypesCheck";
+import { OnBoardingDotParams } from "../../TypesCheck/OnboardingTypesCheck";
 import Animated, {
   Extrapolation,
   interpolate,
