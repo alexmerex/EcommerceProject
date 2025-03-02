@@ -16,27 +16,30 @@ export const CategoryCard = ({ item, catProps, catStyleProps }: ICatProps) => {
 
     return (
         <View style={styles.container}>
-            {catProps.imageBg !== undefined ? (
+            {catProps.imageBg ? (
                 <Pressable
                     style={styles.imageContainer}
                     key={item._id}
                     onPress={catProps.onPress}
                 >
                     <ImageBackground
-                        source={{ uri: catProps?.imageBg }}
-                        style={[styles.imageBg, { height: catStyleProps.imageBgHt }]}
+                        source={{ uri: catProps.imageBg }}
+                        style={[
+                            styles.imageBg,
+                            { height: catStyleProps?.imageBgHt ?? 150 } // ✅ Đặt giá trị mặc định nếu undefined
+                        ]}
                     >
                         <Image
-                            source={{ uri: item?.images[0] }}
+                            source={{ uri: item?.images?.[0] || "https://via.placeholder.com/150" }} // ✅ Ảnh mặc định nếu không có ảnh
                             style={[
                                 styles.image,
                                 {
-                                    width: catStyleProps.width,
-                                    height: catStyleProps.height,
-                                    borderRadius: catStyleProps.radius,
+                                    width: catStyleProps?.width ?? 100, // ✅ Nếu width không có, mặc định là 100
+                                    height: catStyleProps?.height ?? 100, // ✅ Nếu height không có, mặc định là 100
+                                    borderRadius: catStyleProps?.radius ?? 10, // ✅ Nếu radius không có, mặc định là 10
                                 },
                             ]}
-                            resizeMode={catStyleProps.resizeMode}
+                            resizeMode={catStyleProps?.resizeMode || "cover"} // ✅ Nếu resizeMode không có, mặc định là "cover"
                         />
                     </ImageBackground>
                 </Pressable>
@@ -48,21 +51,22 @@ export const CategoryCard = ({ item, catProps, catStyleProps }: ICatProps) => {
                 >
                     <View style={styles.imageContainer}>
                         <Image
-                            source={{ uri: item?.images[0] }}
+                            source={{ uri: item?.images?.[0] || "https://via.placeholder.com/150" }} // ✅ Ảnh mặc định nếu không có ảnh
                             style={[
                                 styles.image,
                                 {
-                                    width: catStyleProps.width,
-                                    height: catStyleProps.height,
-                                    borderRadius: catStyleProps.radius,
+                                    width: catStyleProps?.width ?? 100, // ✅ Giá trị mặc định nếu thiếu
+                                    height: catStyleProps?.height ?? 100,
+                                    borderRadius: catStyleProps?.radius ?? 10,
                                 },
                             ]}
-                            resizeMode={catStyleProps?.resizeMode}
+                            resizeMode={catStyleProps?.resizeMode || "cover"} // ✅ Giá trị mặc định nếu thiếu
                         />
                     </View>
                 </TouchableOpacity>
             )}
-            <Text style={styles.catName}>{item?.name}</Text>
+            <Text style={styles.catName}>{item?.name || "No Name"}</Text>
+            {/* ✅ Nếu name bị thiếu, sẽ hiển thị "No Name" */}
         </View>
     );
 };
