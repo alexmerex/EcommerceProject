@@ -2,11 +2,13 @@ import {
   BottomTabScreenProps,
   createBottomTabNavigator,
 } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { CompositeScreenProps } from "@react-navigation/native";
 import { RootStackScreenProps } from "./RootNavigator";
 import HomeScreen from "../Screens/HomeScreen";
 import CartScreen from "../Screens/CartScreen";
 import ProfileScreen from "../Screens/ProfileScreen";
+import EditProfileScreen from "../Screens/EditProfileScreen";
 import { Entypo, AntDesign, Ionicons } from "@expo/vector-icons";
 
 export type TabsStackParams = {
@@ -18,18 +20,23 @@ export type TabsStackParams = {
     price?: number;
     color?: string;
     size?: string;
-    quantity?: number; // ✅ Cho phép giá trị tùy chọn
+    quantity?: number;
   };
-  Profile: undefined;
+  UserProfile: { updated?: boolean }; // ✅ Đổi tên Profile để tránh lỗi trùng tên
+  EditProfile: { userData: any };
 };
 
 const TabsStack = createBottomTabNavigator<TabsStackParams>();
+const ProfileStack = createNativeStackNavigator<TabsStackParams>();
 
-export type TabsStackScreenProps<T extends keyof TabsStackParams> =
-  CompositeScreenProps<
-    BottomTabScreenProps<TabsStackParams, T>,
-    RootStackScreenProps<"TabsStack">
-  >;
+const ProfileStackNavigator = () => {
+  return (
+    <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+      <ProfileStack.Screen name="UserProfile" component={ProfileScreen} />
+      <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
+    </ProfileStack.Navigator>
+  );
+};
 
 const TabsNavigator = () => {
   return (
@@ -61,8 +68,8 @@ const TabsNavigator = () => {
         }}
       />
       <TabsStack.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="UserProfile"
+        component={ProfileStackNavigator}
         options={{
           headerShown: false,
           tabBarIcon: ({ focused }) =>

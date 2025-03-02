@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useContext, memo } from "react";
+import React, { useState, useEffect, useContext, memo, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native"; // ✅ Import hook này
 import { TabsStackScreenProps } from "../Navigation/TabsNavigation";
 import { UserType } from "../Components/LoginRegisterComponents/UserContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,16 +12,17 @@ const ProfileScreen = ({ navigation, route }: TabsStackScreenProps<"Profile">) =
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (route.params?.userData) {
-      setUserData(route.params.userData.user || route.params.userData);
-    } else {
+  // ✅ Dùng useFocusEffect để load lại dữ liệu mỗi khi quay về ProfileScreen
+  useFocusEffect(
+    useCallback(() => {
       getUserData();
-    }
-  }, [route.params]);
+    }, [route.params?.updated]) // Nếu "updated" thay đổi, dữ liệu sẽ được làm mới
+  );
 
+  // ✅ Hàm lấy dữ liệu từ AsyncStorage
   const getUserData = async () => {
     try {
+      setLoading(true);
       const data = await AsyncStorage.getItem("userData");
       if (data) {
         const parsedData = JSON.parse(data);
@@ -73,6 +75,16 @@ const ProfileScreen = ({ navigation, route }: TabsStackScreenProps<"Profile">) =
             )}
           />
 
+          {/* Nút chỉnh sửa hồ sơ */}
+          <TouchableOpacity
+            style={styles.editProfileButton}
+            onPress={() => navigation.navigate("EditProfile", { userData })}
+          >
+            <Ionicons name="create-outline" size={20} color="white" />
+            <Text style={styles.editProfileText}>Chỉnh sửa hồ sơ</Text>
+          </TouchableOpacity>
+
+          {/* Nút đăng xuất */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={20} color="white" />
             <Text style={styles.logoutText}>Đăng xuất</Text>
@@ -111,8 +123,18 @@ const styles = StyleSheet.create({
   },
   label: { fontSize: 16, fontWeight: "600", color: "#444" },
   value: { fontSize: 16, color: "#666" },
+  editProfileButton: {
+    marginTop: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#4CAF50",
+    padding: 14,
+    borderRadius: 8,
+  },
+  editProfileText: { color: "white", fontSize: 16, fontWeight: "bold", marginLeft: 8 },
   logoutButton: {
-    marginTop: 20,
+    marginTop: 15,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
