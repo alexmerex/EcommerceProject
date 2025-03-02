@@ -9,7 +9,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { CartState } from '../TypesCheck/productCartTypes';
 import { ProductListParams } from '../TypesCheck/HomeProps';
-import addToCart from "../redux/CartReducer";
+import { addToCart } from "../redux/CartReducer";
 
 const { width } = Dimensions.get("window");
 

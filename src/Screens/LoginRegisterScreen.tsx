@@ -48,7 +48,7 @@ const UserAuth = ({ navigation, route }: RootStackScreenProps<"UserLogin">) => {
         }
         setLoading(true);
         try {
-            const { data } = await axios.post("http://192.168.100.202:9000/user/loginUser", user);
+            const { data } = await axios.post("http://172.168.11.225:9000/user/loginUser", user);
             handleLoginSuccess(data._id);
         } catch (error) {
             Alert.alert("Lỗi đăng nhập", error.response?.data?.message || "Có lỗi xảy ra");
@@ -65,7 +65,7 @@ const UserAuth = ({ navigation, route }: RootStackScreenProps<"UserLogin">) => {
         }
         setLoading(true);
         try {
-            const { status } = await axios.post("http://192.168.100.202:9000/user/registerUser", user);
+            const { status } = await axios.post("http://172.168.11.225:9000/user/registerUser", user);
             if (status === 201 || status === 200) {
                 Alert.alert("Đăng ký thành công!", "Bạn có thể đăng nhập ngay bây giờ");
                 toggleAuthMode();
