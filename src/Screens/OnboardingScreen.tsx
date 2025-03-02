@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useRef } from "react";
-import { View, SafeAreaView, ViewToken } from "react-native";
-import { RootStackScreenProps } from "../Navigation/RootNavigator";
-import { OnBoardingPrograms } from "../TypesCheck/OnboardingTypesCheck";
-import { OnBoardingData } from "../Data/EcommerceAppData";
+import { View, SafeAreaView } from "react-native";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
   useAnimatedRef,
 } from "react-native-reanimated";
+import { RootStackScreenProps } from "../Navigation/RootNavigator";
+import { OnBoardingPrograms } from "../TypesCheck/OnboardingTypesCheck";
+import { OnBoardingData } from "../Data/EcommerceAppData";
 
 import OnBoardingItems from "../Components/OnboardingComponents/OnboardingItems";
 import OnBoardingPagination from "../Components/OnboardingComponents/OnBoardingPagination";
@@ -19,9 +19,7 @@ const OnBoardingScreen = ({
 }: RootStackScreenProps<"OnBoardingScreen">) => {
   const [onBoardingItems] = useState<OnBoardingPrograms[]>(OnBoardingData);
 
-  // ✅ Use useAnimatedRef with Animated.FlatList
   const flatListRef = useAnimatedRef<Animated.FlatList<OnBoardingPrograms>>();
-
   const x = useSharedValue(0);
   const flatListIndex = useSharedValue(0);
   const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 });
@@ -32,43 +30,47 @@ const OnBoardingScreen = ({
     },
   });
 
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
-        flatListIndex.value = viewableItems[0].index;
-      }
-    },
-    []
-  );
+  const onViewableItemsChanged = useCallback(({ viewableItems }) => {
+    if (viewableItems.length > 0 && viewableItems[0].index !== null) {
+      flatListIndex.value = viewableItems[0].index;
+    }
+  }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#F8F9FA" }}>
       <Animated.FlatList
-        ref={flatListRef} // ✅ Fix: Ensure ref type matches Animated.FlatList
+        ref={flatListRef}
         onScroll={onScrollHandler}
         data={onBoardingItems}
-        renderItem={({ item, index }: { item: OnBoardingPrograms; index: number }) => (
+        renderItem={({ item, index }) => (
           <OnBoardingItems item={item} index={index} x={x} />
         )}
-        keyExtractor={(item: OnBoardingPrograms) => item._id}
-        scrollEventThrottle={17}
+        keyExtractor={(item) => item._id}
+        scrollEventThrottle={16}
         horizontal
         showsHorizontalScrollIndicator={false}
         pagingEnabled
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig.current}
       />
+
+      {/* Điều hướng và phân trang */}
       <View
         style={{
           position: "absolute",
-          bottom: 20,
-          left: 0,
+          bottom: 30,
+          left: 20,
+          right: 20,
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          marginHorizontal: 30,
-          paddingVertical: 30,
-          width: "100%",
+          padding: 20,
+          borderRadius: 12,
+          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 5 },
+          shadowOpacity: 0.2,
+          shadowRadius: 10,
         }}
       >
         <OnBoardingPagination data={onBoardingItems} x={x} />

@@ -1,4 +1,4 @@
-import { View, Text, useWindowDimensions, StyleSheet } from "react-native";
+import { View, useWindowDimensions, StyleSheet } from "react-native";
 import React from "react";
 import { OnBoardingDotParams } from "../../TypesCheck/OnboardingTypesCheck";
 import Animated, {
@@ -6,23 +6,24 @@ import Animated, {
   interpolate,
   interpolateColor,
   useAnimatedStyle,
+  withSpring,
 } from "react-native-reanimated";
-
-type Props = {};
 
 const OnboardingDots = ({ index, x }: OnBoardingDotParams) => {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
 
   const animatedDotStyle = useAnimatedStyle(() => {
-    const widthAnimation = interpolate(
-      x.value,
-      [
-        (index - 1) * SCREEN_WIDTH,
-        index * SCREEN_WIDTH,
-        (index + 1) * SCREEN_WIDTH,
-      ],
-      [10, 30, 10],
-      Extrapolation.CLAMP
+    const widthAnimation = withSpring(
+      interpolate(
+        x.value,
+        [
+          (index - 1) * SCREEN_WIDTH,
+          index * SCREEN_WIDTH,
+          (index + 1) * SCREEN_WIDTH,
+        ],
+        [10, 35, 10],
+        Extrapolation.CLAMP
+      )
     );
 
     const opacityAnimation = interpolate(
@@ -32,7 +33,7 @@ const OnboardingDots = ({ index, x }: OnBoardingDotParams) => {
         index * SCREEN_WIDTH,
         (index + 1) * SCREEN_WIDTH,
       ],
-      [1, 2, 1],
+      [0.5, 1, 0.5],
       Extrapolation.CLAMP
     );
 
@@ -54,14 +55,21 @@ const OnboardingDots = ({ index, x }: OnBoardingDotParams) => {
     };
   });
 
-  return <Animated.View style={[sty.dots, animatedDotStyle, colorAnimation]} />;
+  return <Animated.View style={[styles.dots, animatedDotStyle, colorAnimation]} />;
 };
+
 export default OnboardingDots;
 
-const sty = StyleSheet.create({
+const styles = StyleSheet.create({
   dots: {
-    height: 10,
-    marginHorizontal: 10,
-    borderRadius: 5,
+    height: 12,
+    borderRadius: 99,
+    marginHorizontal: 8,
+    backgroundColor: "#ddd",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
 });

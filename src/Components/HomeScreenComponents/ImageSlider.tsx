@@ -1,90 +1,109 @@
-import react, { useState, useRef } from "react";
-import { View, Text, SafeAreaView, Dimensions, Animated, StyleSheet, Image } from "react-native";
-import { Entypo, AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useInterval } from '../../Hooks/UseInterval';
-import { ScrollView } from "react-native";
-
-
-interface ImageProps {
-    images: string[]
-}
+import React, { useState, useRef } from "react";
+import {
+    View,
+    Image,
+    Animated,
+    StyleSheet,
+    TouchableOpacity,
+    Dimensions,
+} from "react-native";
+import { useInterval } from "../../Hooks/UseInterval";
 
 const Max_Width = Dimensions.get("screen").width;
+const Max_Height = 220; // Chiều cao cố định
 
-const ImageSlider = ({ images }: ImageProps) => {
-    const animation = useRef(new Animated.Value(0));
-    const [currentImage, setCurrentImage] = useState(0);
-
-    const handleAnimation = () => {
-        let newCurrentImage = currentImage + 1;
-        if (newCurrentImage >= images.length) {
-            newCurrentImage = currentImage * 0;
-        }
-        Animated.spring(animation.current, {
-            toValue: -(Dimensions.get('screen').width * newCurrentImage),
-            useNativeDriver: true,
-        }).start();
-        setCurrentImage(newCurrentImage);
-    }
-
-    useInterval(() => handleAnimation(), 2000);
-
-    return (
-        <>
-            <View>
-                <Animated.View style={[styles.container, { transform: [{ translateX: animation.current }] }]}>
-                    {images.map(image => (
-                        <Image key={image} source={{ uri: image }} style={styles.image} />
-                    ))}
-                </Animated.View>
-                <View style={styles.indicatorContainer}>
-                    {
-                        images.map((image, index) => (
-                            <View key={`${image}_${index}`}
-                                style={[styles.indicator, index === currentImage ? styles.activeIndicator : undefined]}
-                            />
-                        ))
-                    }
-                </View>
-
-            </View>
-        </>
-    )
+interface ImageProps {
+    images: string[];
 }
 
-export default ImageSlider
+const ImageSlider = ({ images }: ImageProps) => {
+    const animation = useRef(new Animated.Value(0)).current;
+    const [currentImage, setCurrentImage] = useState(0);
+
+    const handleAnimation = (index?: number) => {
+        let newIndex = index !== undefined ? index : currentImage + 1;
+        if (newIndex >= images.length) {
+            newIndex = 0;
+        }
+
+        Animated.timing(animation, {
+            toValue: -Max_Width * newIndex,
+            duration: 400, // Mượt hơn
+            useNativeDriver: true,
+        }).start();
+
+        setCurrentImage(newIndex);
+    };
+
+    useInterval(() => handleAnimation(), 3000); // Tự động chuyển ảnh mỗi 3 giây
+
+    return (
+        <View>
+            <Animated.View
+                style={[
+                    styles.imageContainer,
+                    { transform: [{ translateX: animation }] },
+                ]}
+            >
+                {images.map((image, index) => (
+                    <Image key={index} source={{ uri: image }} style={styles.image} />
+                ))}
+            </Animated.View>
+
+            {/* Chỉ mục ảnh */}
+            <View style={styles.indicatorContainer}>
+                {images.map((_, index) => (
+                    <TouchableOpacity
+                        key={index}
+                        onPress={() => handleAnimation(index)}
+                        style={[
+                            styles.indicator,
+                            index === currentImage ? styles.activeIndicator : undefined,
+                        ]}
+                    />
+                ))}
+            </View>
+        </View>
+    );
+};
+
+export default ImageSlider;
 
 const styles = StyleSheet.create({
-    container: {
+    imageContainer: {
         flexDirection: "row",
         backgroundColor: "#fff",
-        alignItems: "center"
+        alignItems: "center",
     },
     image: {
-        resizeMode: "contain",
-        height: 220,
-        width: Dimensions.get("screen").width,
-        borderWidth: 7,
-        borderColor: "white"
+        resizeMode: "cover",
+        height: Max_Height,
+        width: Max_Width,
+        borderRadius: 10, // Bo góc ảnh
+        marginHorizontal: 5, // Khoảng cách giữa ảnh
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
     },
     indicatorContainer: {
-        flexDirection: "row", justifyContent: "center", alignItems: "center",
-        width: Max_Width,
-        bottom: 0,
-        zIndex: 2
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 10,
     },
     indicator: {
-        width: 10,
-        height: 10,
-        borderRadius: 7.5,
-        borderColor: "silver",
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        borderColor: "#bbb",
         borderWidth: 1,
-        marginHorizontal: 3,
-        marginBottom: 0,
-        backgroundColor: "#eee"
+        marginHorizontal: 4,
+        backgroundColor: "#ddd",
     },
     activeIndicator: {
-        backgroundColor: "green"
-    }
-
-})
+        backgroundColor: "#FF6F00",
+        borderColor: "#FF6F00",
+        transform: [{ scale: 1.2 }], // Làm nổi bật khi active
+    },
+});

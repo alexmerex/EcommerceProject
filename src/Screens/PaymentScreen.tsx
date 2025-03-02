@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,9 +13,9 @@ import { TabsStackScreenProps } from "../Navigation/TabsNavigation";
 const PaymentScreen = ({ navigation, route }: TabsStackScreenProps<"Payment">) => {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false); // 🆕 Thêm trạng thái loading
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // 📌 Nhận `totalAmount` từ `route.params` hoặc lấy từ AsyncStorage
+  // ✅ Lấy dữ liệu từ params hoặc AsyncStorage
   useEffect(() => {
     const fetchTotalAmount = async () => {
       try {
@@ -33,83 +33,69 @@ const PaymentScreen = ({ navigation, route }: TabsStackScreenProps<"Payment">) =
     fetchTotalAmount();
   }, [route.params?.totalAmount]);
 
-  // 📌 Xử lý khi chọn phương thức thanh toán
-  const handlePaymentMethodSelect = (method: string) => {
+  // ✅ Hàm chọn phương thức thanh toán tối ưu hóa với useCallback
+  const handlePaymentMethodSelect = useCallback((method: string) => {
     setSelectedMethod(method);
-  };
+  }, []);
 
-  // 📌 Xử lý thanh toán
-  const handlePayment = () => {
+  // ✅ Tính toán lại tổng tiền chỉ khi totalAmount thay đổi
+  const formattedTotalAmount = useMemo(() => {
+    return totalAmount.toLocaleString() + " VNĐ";
+  }, [totalAmount]);
+
+  // ✅ Xử lý thanh toán
+  const handlePayment = useCallback(() => {
     if (!selectedMethod) {
       Alert.alert("Lỗi", "Vui lòng chọn phương thức thanh toán!");
       return;
     }
 
-    setLoading(true); // 🆕 Hiển thị loading
-
-    // 🔥 Giả lập quá trình thanh toán (có thể thay bằng API thực tế)
+    setLoading(true);
     setTimeout(() => {
-      setLoading(false); // 🆕 Ẩn loading
+      setLoading(false);
       Alert.alert(
         "Thanh toán thành công!",
-        `Bạn đã thanh toán ${totalAmount.toLocaleString()} VNĐ bằng ${selectedMethod}.`,
+        `Bạn đã thanh toán ${formattedTotalAmount} bằng ${selectedMethod}.`,
         [{ text: "OK", onPress: () => navigateToHome() }]
       );
 
-      // 🗑️ Xóa totalAmount sau khi thanh toán thành công
       AsyncStorage.removeItem("totalAmount");
     }, 2000);
-  };
+  }, [selectedMethod, formattedTotalAmount]);
 
-  // 📌 ✅ Điều hướng chính xác về Home trong TabsStack
-  const navigateToHome = () => {
-    navigation.navigate("TabsStack", { screen: "Home" }); // ✅ Điều hướng chính xác về Home trong TabsStack
-
-  };
+  // ✅ Điều hướng chính xác về Home
+  const navigateToHome = useCallback(() => {
+    navigation.navigate("TabsStack", { screen: "Home" });
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Chọn phương thức thanh toán</Text>
 
-      <TouchableOpacity
-        style={[
-          styles.option,
-          selectedMethod === "Ví điện tử" && styles.selectedOption,
-        ]}
-        onPress={() => handlePaymentMethodSelect("Ví điện tử")}
-      >
-        <Text style={styles.optionText}>💳 Ví điện tử</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.option,
-          selectedMethod === "Thẻ ngân hàng" && styles.selectedOption,
-        ]}
-        onPress={() => handlePaymentMethodSelect("Thẻ ngân hàng")}
-      >
-        <Text style={styles.optionText}>🏦 Thẻ ngân hàng</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.option,
-          selectedMethod === "Tiền mặt khi nhận hàng" && styles.selectedOption,
-        ]}
-        onPress={() => handlePaymentMethodSelect("Tiền mặt khi nhận hàng")}
-      >
-        <Text style={styles.optionText}>💵 Tiền mặt khi nhận hàng</Text>
-      </TouchableOpacity>
+      {["Ví điện tử", "Thẻ ngân hàng", "Tiền mặt khi nhận hàng"].map((method) => (
+        <TouchableOpacity
+          key={method}
+          style={[
+            styles.option,
+            selectedMethod === method && styles.selectedOption,
+          ]}
+          onPress={() => handlePaymentMethodSelect(method)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.optionText}>
+            {method === "Ví điện tử" ? "💳" : method === "Thẻ ngân hàng" ? "🏦" : "💵"} {method}
+          </Text>
+        </TouchableOpacity>
+      ))}
 
       <View style={styles.totalContainer}>
-        <Text style={styles.totalText}>Tổng tiền: {totalAmount.toLocaleString()} VNĐ</Text>
+        <Text style={styles.totalText}>Tổng tiền: {formattedTotalAmount}</Text>
       </View>
 
-      {/* Hiển thị Loading khi đang xử lý thanh toán */}
       {loading ? (
         <ActivityIndicator size="large" color="#007bff" style={styles.loadingIndicator} />
       ) : (
-        <TouchableOpacity style={styles.payButton} onPress={handlePayment}>
+        <TouchableOpacity style={styles.payButton} onPress={handlePayment} activeOpacity={0.7}>
           <Text style={styles.payButtonText}>Thanh toán ngay</Text>
         </TouchableOpacity>
       )}
@@ -119,11 +105,11 @@ const PaymentScreen = ({ navigation, route }: TabsStackScreenProps<"Payment">) =
 
 export default PaymentScreen;
 
-// 📌 Styles
+// ✅ Style tối ưu và chuyên nghiệp hơn
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#F2F5F9",
     padding: 20,
     alignItems: "center",
   },
@@ -131,16 +117,21 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
+    color: "#333",
   },
   option: {
     width: "100%",
     padding: 15,
     backgroundColor: "#fff",
-    borderRadius: 8,
+    borderRadius: 10,
     marginBottom: 10,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#ddd",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
   selectedOption: {
     borderColor: "#007bff",
@@ -149,9 +140,17 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "#333",
   },
   totalContainer: {
     marginVertical: 20,
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
   totalText: {
     fontSize: 18,
@@ -161,9 +160,13 @@ const styles = StyleSheet.create({
   payButton: {
     backgroundColor: "#007bff",
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 10,
     width: "100%",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
   payButtonText: {
     color: "white",

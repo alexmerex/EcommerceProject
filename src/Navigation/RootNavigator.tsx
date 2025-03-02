@@ -8,25 +8,13 @@ import OnBoardingScreen from "../Screens/OnboardingScreen";
 import TabsNavigator, { TabsStackParams } from "./TabsNavigation";
 import ProductDetails from "../Screens/ProductDetails";
 import CartScreen from "../Screens/CartScreen";
-import PaymentScreen from "../Screens/PaymentScreen"; // ✅ Thêm PaymentScreen
+import PaymentScreen from "../Screens/PaymentScreen";
 import UserAuth from "../Screens/LoginRegisterScreen";
 import ProfileScreen from "../Screens/ProfileScreen";
 
-// Định nghĩa kiểu dữ liệu cho RootStackParams
 export type RootStackParams = {
   OnBoardingScreen: undefined;
   TabsStack: NavigatorScreenParams<TabsStackParams>;
-  Deals: undefined;
-  Profile: undefined;
-  Cart: {
-    _id: string;
-    images: [string];
-    name: string;
-    price: number;
-    color?: string;
-    size?: string;
-    quantity: number;
-  };
   productDetails: {
     _id: string;
     images: [string];
@@ -39,7 +27,16 @@ export type RootStackParams = {
     description?: string;
     quantity: number;
   };
-  Payment: { totalAmount: number }; // ✅ Thêm Payment vào RootStackParams
+  Cart: {
+    _id: string;
+    images: [string];
+    name: string;
+    price: number;
+    color?: string;
+    size?: string;
+    quantity: number;
+  };
+  Payment: { totalAmount: number }; // ✅ Chỉ giữ ở RootNavigator
   UserLogin: {
     email?: string;
     password?: string;
@@ -49,52 +46,24 @@ export type RootStackParams = {
     mobileNo?: string;
     screenTitle?: string;
   };
+  Profile: undefined;
 };
 
-// Khởi tạo Stack Navigator
 const RootStack = createNativeStackNavigator<RootStackParams>();
+
 export type RootStackScreenProps<T extends keyof RootStackParams> =
   NativeStackScreenProps<RootStackParams, T>;
 
-// Component điều hướng chính
 const RootNavigator = () => {
   return (
-    <RootStack.Navigator>
-      <RootStack.Screen
-        name="OnBoardingScreen"
-        component={OnBoardingScreen}
-        options={{ headerShown: false }}
-      />
-      <RootStack.Screen
-        name="TabsStack"
-        component={TabsNavigator}
-        options={{ headerShown: false }}
-      />
-      <RootStack.Screen
-        name="productDetails"
-        component={ProductDetails}
-        options={{ headerShown: false }}
-      />
-      <RootStack.Screen
-        name="Cart"
-        component={CartScreen}
-        options={{ headerShown: false }}
-      />
-      <RootStack.Screen
-        name="Payment" // ✅ Thêm màn hình Payment vào RootNavigator
-        component={PaymentScreen}
-        options={{ headerShown: false }}
-      />
-      <RootStack.Screen
-        name="UserLogin"
-        component={UserAuth}
-        options={{ headerShown: false }}
-      />
-      <RootStack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ headerShown: false }}
-      />
+    <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Screen name="OnBoardingScreen" component={OnBoardingScreen} />
+      <RootStack.Screen name="TabsStack" component={TabsNavigator} />
+      <RootStack.Screen name="productDetails" component={ProductDetails} />
+      <RootStack.Screen name="Cart" component={CartScreen} />
+      <RootStack.Screen name="Payment" component={PaymentScreen} />
+      <RootStack.Screen name="UserLogin" component={UserAuth} />
+      <RootStack.Screen name="Profile" component={ProfileScreen} />
     </RootStack.Navigator>
   );
 };

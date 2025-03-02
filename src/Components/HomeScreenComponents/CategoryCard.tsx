@@ -1,67 +1,108 @@
-import { View, Text, Pressable, ImageBackground, Image, TouchableOpacity, StyleSheet } from 'react-native'
-import React from 'react'
-import { ICatProps } from '../../TypesCheck/CategoryTypes';
+import {
+    View,
+    Text,
+    Pressable,
+    ImageBackground,
+    Image,
+    TouchableOpacity,
+    StyleSheet,
+} from "react-native";
+import React from "react";
+import { ICatProps } from "../../TypesCheck/CategoryTypes";
 
 export const CategoryCard = ({ item, catProps, catStyleProps }: ICatProps) => {
     let isActive = item._id === catProps.activeCat;
-    let activeButtonClass = isActive ? "orange" : "#eee"; // change color khi no active
+    let activeButtonColor = isActive ? "#FF6F00" : "#F5F5F5"; // Màu sắc chuyên nghiệp hơn
 
     return (
-        <View>
+        <View style={styles.container}>
             {catProps.imageBg !== undefined ? (
-                <View style={{ alignItems: "center" }}>
-                    <Pressable style={st.imageContainer} key={item._id} onPress={catProps.onPress}>
-                        <ImageBackground source={{ uri: catProps?.imageBg }} style={styl(catStyleProps.imageBgHt).imageBg}>
-                            <Image source={{ uri: item?.images[0] }}
-                                style={sty(catStyleProps.width, catStyleProps.height, catStyleProps.radius).imgStyleProps}
-                                resizeMode={catStyleProps.resizeMode}
-                            />
-                        </ImageBackground>
-                    </Pressable>
-                    <Text style={st.catName}>{item?.name}</Text>
-                </View>
+                <Pressable
+                    style={styles.imageContainer}
+                    key={item._id}
+                    onPress={catProps.onPress}
+                >
+                    <ImageBackground
+                        source={{ uri: catProps?.imageBg }}
+                        style={[styles.imageBg, { height: catStyleProps.imageBgHt }]}
+                    >
+                        <Image
+                            source={{ uri: item?.images[0] }}
+                            style={[
+                                styles.image,
+                                {
+                                    width: catStyleProps.width,
+                                    height: catStyleProps.height,
+                                    borderRadius: catStyleProps.radius,
+                                },
+                            ]}
+                            resizeMode={catStyleProps.resizeMode}
+                        />
+                    </ImageBackground>
+                </Pressable>
             ) : (
-                <TouchableOpacity style={[st.touchableStyle, { backgroundColor: activeButtonClass }]} key={item._id} onPress={catProps.onPress}>
-                    <View style={st.imageContainer}>
-                        <Image source={{ uri: item?.images[0] }}
-                            style={sty(catStyleProps.width, catStyleProps.height, catStyleProps.radius).imgStyleProps}
+                <TouchableOpacity
+                    style={[styles.touchableStyle, { backgroundColor: activeButtonColor }]}
+                    key={item._id}
+                    onPress={catProps.onPress}
+                >
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={{ uri: item?.images[0] }}
+                            style={[
+                                styles.image,
+                                {
+                                    width: catStyleProps.width,
+                                    height: catStyleProps.height,
+                                    borderRadius: catStyleProps.radius,
+                                },
+                            ]}
                             resizeMode={catStyleProps?.resizeMode}
                         />
                     </View>
                 </TouchableOpacity>
             )}
+            <Text style={styles.catName}>{item?.name}</Text>
         </View>
     );
-}
+};
 
-const st = StyleSheet.create({
+const styles = StyleSheet.create({
+    container: {
+        alignItems: "center",
+        marginHorizontal: 5,
+    },
     imageContainer: {
         borderRadius: 50,
-        padding: 3
+        padding: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        backgroundColor: "#FFF",
+    },
+    imageBg: {
+        borderRadius: 11,
+        overflow: "hidden",
+    },
+    image: {
+        borderRadius: 10,
     },
     catName: {
-        fontSize: 8,
-        fontWeight: "bold"
+        fontSize: 10,
+        fontWeight: "bold",
+        color: "#333",
+        marginTop: 5,
     },
     touchableStyle: {
-        alignItems: 'center',
-        padding: 5,
+        alignItems: "center",
+        padding: 7,
         borderRadius: 20,
-        margin: 3
-    }
-})
-
-const styl = (height?: number) => ({
-    imageBg: {
-        height,
-        borderRadius: 11
-    }
-})
-
-const sty = (width?: number, height?: number, radius?: number) => ({
-    imgStyleProps: {
-        width,
-        height,
-        borderRadius: radius
-    }
-})
+        margin: 3,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+    },
+});

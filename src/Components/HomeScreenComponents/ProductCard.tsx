@@ -1,75 +1,102 @@
-import { View, Text, Pressable, ImageBackground, Image, TouchableOpacity, StyleSheet, ImageBackgroundComponent } from 'react-native'
-import React from 'react'
-import { IProductProps } from '../../TypesCheck/ProductTypes';
+import React from "react";
+import {
+    View,
+    Text,
+    Pressable,
+    ImageBackground,
+    Image,
+    StyleSheet,
+} from "react-native";
+import { IProductProps } from "../../TypesCheck/ProductTypes";
 
 export const ProductCard = ({ item, productProps, pStyleProps }: IProductProps) => {
     return (
-        <View
-            style={sty(pStyleProps?.width, pStyleProps?.marginHorizontal, pStyleProps?.marginBottom).pCardContainer}
-        >
+        <View style={[styles.cardContainer, { width: pStyleProps?.width, marginHorizontal: pStyleProps?.marginHorizontal, marginBottom: pStyleProps?.marginBottom }]}>
+            {/* Ảnh nền */}
             <ImageBackground
                 source={{ uri: productProps?.imageBg }}
-                style={styl(pStyleProps?.height).imageBg} imageStyle={{ borderRadius: 6 }}
+                style={[styles.imageBg, { height: pStyleProps?.height }]}
+                imageStyle={{ borderRadius: 8 }}
             >
-                <Pressable key={item._id} onPress={productProps?.onPress} style={{ alignItems: "center" }}>
+                <Pressable key={item._id} onPress={productProps?.onPress} style={styles.pressableContainer}>
                     <Image
                         source={{ uri: item?.images[0] }}
-                        style={{
-                            resizeMode: pStyleProps?.resizeMode,
-                            height: "100%",
-                            width: 70,
-                        }}
+                        style={[
+                            styles.productImage,
+                            { resizeMode: pStyleProps?.resizeMode, width: 80 },
+                        ]}
                     />
                 </Pressable>
             </ImageBackground>
 
-            <Text style={{ textAlign: "center", fontSize: 12, fontWeight: "500", marginBottom: 5 }}>{item?.name}</Text>
+            {/* Tên sản phẩm */}
+            <Text style={styles.productName}>{item?.name}</Text>
 
-            {productProps?.percentageWidth !== undefined &&
+            {/* Thanh tiến trình */}
+            {productProps?.percentageWidth !== undefined && (
                 <>
-                    <View style={{ marginTop: 12 }}>
-                        <Text style={{ fontSize: 12 }}>{item?.quantity} items left</Text>
-                    </View>
-                    <View style={sty().progressBarContainer}>
-                        <View style={sst(productProps?.percentageWidth ? 0 : 1).progressBar} />
+                    <Text style={styles.stockText}>{item?.quantity} items left</Text>
+                    <View style={styles.progressBarContainer}>
+                        <View style={[styles.progressBar, { width: productProps?.percentageWidth }]} />
                     </View>
                 </>
-            }
+            )}
         </View>
-    )
-}
+    );
+};
 
-const sty = (width?: number, marginHorizontal?: number, marginBottom?: number, percentageWidth?: number) => ({
-    pCardContainer: {
-        width,
-        marginHorizontal,
+const styles = StyleSheet.create({
+    cardContainer: {
         borderWidth: 1,
-        borderColor: "grey",
+        borderColor: "#ddd",
         borderRadius: 10,
-        marginBottom,
-        backgroundColor: "white",
+        backgroundColor: "#fff",
+        padding: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3, // Hiệu ứng nổi trên Android
+    },
+    imageBg: {
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 10,
+    },
+    pressableContainer: {
+        alignItems: "center",
+    },
+    productImage: {
+        height: "100%",
+        width: 80,
+    },
+    productName: {
+        textAlign: "center",
+        fontSize: 14,
+        fontWeight: "600",
+        marginTop: 8,
+        color: "#333",
+    },
+    stockText: {
+        fontSize: 12,
+        textAlign: "center",
+        color: "#777",
+        marginTop: 6,
     },
     progressBarContainer: {
-        width: 100,
-        height: 6,
-        backgroundColor: "silver",
-        borderRadius: 99,
-        marginTop: 7,
-    }
-})
-
-const styl = (height?: number) => ({
-    imageBg: {
-        height,
-        borderRadius: 10,
+        width: "100%",
+        height: 8,
+        backgroundColor: "#e0e0e0",
+        borderRadius: 50,
+        marginTop: 6,
+        overflow: "hidden",
     },
-})
-
-const sst = (percentageWidth?: number) => ({
     progressBar: {
-        width: percentageWidth,
-        backgroundColor: "purple",
-        borderRadius: 99,
-        height: 6,
+        height: "100%",
+        backgroundColor: "#4CAF50",
+        borderRadius: 50,
     },
-})
+});
+
+export default ProductCard;
