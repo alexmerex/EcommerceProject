@@ -6,14 +6,13 @@ import { HeadersComponent } from "../Components/HeaderComponents/HeaderComponent
 import ImageSlider from "../Components/HomeScreenComponents/ImageSlider";
 import { ProductListParams } from "../TypesCheck/HomeProps";
 import { CategoryCard } from "../Components/HomeScreenComponents/CategoryCard";
-import { fetchCategories, fetchProductsByCatID, fetchTrendingProducts } from "../MiddeleWares/HomeMiddeWare";
+import { fetchCategories, fetchProductsByCatID } from "../MiddeleWares/HomeMiddeWare";
 import { useFocusEffect } from "@react-navigation/native";
 import { ProductCard } from "../Components/HomeScreenComponents/ProductCard";
 import { useSelector } from "react-redux";
 import { CartState } from "../TypesCheck/productCartTypes";
 import DisplayMessage from "../Components/ProductDetails/DisplayMessage";
 import ProductDetails from "../Screens/ProductDetails"; // Đảm bảo rằng bạn đã có màn hình ProductDetails
-
 
 const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
   const cart = useSelector((state: { cart: CartState }) => state.cart);
@@ -22,7 +21,6 @@ const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
   const [getCategory, setGetCategory] = useState<ProductListParams[]>([]);
   const [getProductsByCatID, setGetProductsByCatID] = useState<ProductListParams[]>([]);
   const [activeCat, setActiveCat] = useState<string>("");
-  const [trendingProducts, setTrendingProducts] = useState<ProductListParams[]>([]);
 
   const gotoCartScreen = () => {
     if (cart.length === 0) {
@@ -39,11 +37,6 @@ const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
       navigation.navigate("OnBoardingScreen");
     }
   };
-
-  useEffect(() => {
-    fetchCategories({ setGetCategory });
-    fetchTrendingProducts({ setTrendingProducts });
-  }, []);
 
   useEffect(() => {
     if (activeCat) {
@@ -113,39 +106,11 @@ const HomeScreen = ({ navigation, route }: TabsStackScreenProps<"Home">) => {
           )}
         </ScrollView>
       </View>
-
-      {/* Trending Deals Section */}
-      <View style={styles.trendingDealsSection}>
-        <Text style={styles.sectionTitle}>Trending Deals of the Week</Text>
-        <View style={styles.productListContainer}>
-          {trendingProducts.map((item, index) => {
-            const bgImg = item?.images?.length > 0 ? item.images[0] : "";
-            return (
-              <ProductCard
-                key={index}
-                item={{
-                  ...item,
-                  oldPrice: item.oldPrice ?? 0,
-                  description: item.description ?? "",
-                  inStock: item.inStock ?? false,
-                  isFeatured: item.isFeatured ?? false,
-                  category: item.category ?? "",
-                }}
-                pStyleProps={styles.productCard}
-                productProps={{
-                  imageBg: bgImg,
-                  percentageWidth: 100,
-                  onPress: () => navigation.navigate("productDetails", item),
-                }}
-              />
-            );
-          })}
-        </View>
-      </View>
     </SafeAreaView>
   );
 };
 
+// Move styles outside of the HomeScreen component
 const styles = StyleSheet.create({
   safeArea: {
     paddingTop: Platform.OS === "android" ? 40 : 0,
@@ -211,10 +176,6 @@ const styles = StyleSheet.create({
     width: 100,
     borderRadius: 10,
     margin: 5,
-  },
-  trendingDealsSection: {
-    marginTop: 10,
-    backgroundColor: "purple",
   },
   productListContainer: {
     flexDirection: "row",

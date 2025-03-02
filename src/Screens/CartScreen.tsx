@@ -3,12 +3,14 @@ import React, { useContext, useState, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeadersComponent } from "../Components/HeaderComponents/HeaderComponent";
 import { TabsStackScreenProps } from "../Navigation/TabsNavigation";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { CartState } from "../TypesCheck/productCartTypes";
 import DisplayMessage from "../Components/ProductDetails/DisplayMessage";
 import { UserType } from "../Components/LoginRegisterComponents/UserContext";
+import { increaseQuantity, decreaseQuantity, removeFromCart } from "../redux/CartReducer";
 
 const CartScreen = ({ navigation }: TabsStackScreenProps<"Cart">) => {
+  const dispatch = useDispatch();
   const cart = useSelector((state: CartState) => state.cart.cart);
   const [message, setMessage] = useState("");
   const [displayMessage, setDisplayMessage] = useState<boolean>(false);
@@ -17,7 +19,8 @@ const CartScreen = ({ navigation }: TabsStackScreenProps<"Cart">) => {
   // ✅ Tính tổng tiền dùng useMemo để tránh re-render không cần thiết
   const totalAmount = useMemo(() =>
     cart.reduce((acc, item) => acc + item.price * item.quantity, 0),
-    [cart]);
+    [cart]
+  );
 
   const gotoCartScreen = () => {
     if (cart.length === 0) {
@@ -41,10 +44,11 @@ const CartScreen = ({ navigation }: TabsStackScreenProps<"Cart">) => {
       navigation.navigate("UserLogin", {
         redirectTo: "Payment",
         totalAmount,
-        previousScreen: "CartScreen"
+        previousScreen: "CartScreen",
       });
     } else {
-      cart.length === 0 ? navigation.navigate("TabsStack", { screen: "Home" })
+      cart.length === 0
+        ? navigation.navigate("TabsStack", { screen: "Home" })
         : navigation.navigate("Payment", { totalAmount });
     }
   };
@@ -65,6 +69,20 @@ const CartScreen = ({ navigation }: TabsStackScreenProps<"Cart">) => {
               <Text style={styles.itemDetail}>🎨 Màu: {item.color}</Text>
               <Text style={styles.itemDetail}>📏 Size: {item.size}</Text>
               <Text style={styles.itemDetail}>🔢 Số lượng: {item.quantity}</Text>
+
+              {/* ✅ Các nút Tăng/Giảm/Xóa sản phẩm */}
+              <View style={styles.actionContainer}>
+                <Pressable onPress={() => dispatch(decreaseQuantity(item._id))} style={styles.quantityButton}>
+                  <Text style={styles.buttonText}>➖</Text>
+                </Pressable>
+                <Text style={styles.quantityText}>{item.quantity}</Text>
+                <Pressable onPress={() => dispatch(increaseQuantity(item._id))} style={styles.quantityButton}>
+                  <Text style={styles.buttonText}>➕</Text>
+                </Pressable>
+                <Pressable onPress={() => dispatch(removeFromCart(item._id))} style={styles.deleteButton}>
+                  <Text style={styles.buttonText}>🗑️</Text>
+                </Pressable>
+              </View>
             </View>
           )}
           contentContainerStyle={{ padding: 20 }}
@@ -107,6 +125,32 @@ const styles = StyleSheet.create({
   itemDetail: {
     color: "#E0E0E0",
     fontSize: 16,
+  },
+  actionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  quantityButton: {
+    backgroundColor: "#444",
+    padding: 8,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  deleteButton: {
+    backgroundColor: "#D32F2F",
+    padding: 8,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  buttonText: {
+    color: "#FFD700",
+    fontSize: 18,
+  },
+  quantityText: {
+    color: "#FFD700",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   emptyCartText: {
     color: "#FFD700",

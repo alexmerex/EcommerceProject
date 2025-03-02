@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, memo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TabsStackScreenProps } from "../Navigation/TabsNavigation";
 import { UserType } from "../Components/LoginRegisterComponents/UserContext";
@@ -9,13 +9,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const ProfileScreen = ({ navigation, route }: TabsStackScreenProps<"Profile">) => {
   const { setUserId } = useContext(UserType);
   const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (route.params?.userData) {
-      console.log("🔹 Nhận dữ liệu từ navigation:", route.params.userData);
       setUserData(route.params.userData.user || route.params.userData);
     } else {
-      console.log("⚠️ Không có userData từ navigation, lấy từ AsyncStorage...");
       getUserData();
     }
   }, [route.params]);
@@ -25,15 +24,12 @@ const ProfileScreen = ({ navigation, route }: TabsStackScreenProps<"Profile">) =
       const data = await AsyncStorage.getItem("userData");
       if (data) {
         const parsedData = JSON.parse(data);
-        console.log("✅ Dữ liệu từ AsyncStorage:", parsedData);
-
-        // Kiểm tra nếu có thuộc tính `user`, lấy `user`, nếu không lấy toàn bộ parsedData
         setUserData(parsedData.user || parsedData);
-      } else {
-        console.log("⚠️ Không tìm thấy userData trong AsyncStorage");
       }
     } catch (error) {
-      console.error("❌ Lỗi khi lấy dữ liệu từ AsyncStorage:", error);
+      console.error("Lỗi khi lấy dữ liệu từ AsyncStorage:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,17 +48,19 @@ const ProfileScreen = ({ navigation, route }: TabsStackScreenProps<"Profile">) =
   };
 
   const userInfo = [
-    { label: "Mã người dùng", value: userData?._id || "Không có dữ liệu" },
     { label: "Email", value: userData?.email || "user@example.com" },
-    { label: "Họ", value: userData?.firstName || "Không có dữ liệu" },
-    { label: "Tên", value: userData?.lastName || "Không có dữ liệu" },
-    { label: "Số điện thoại", value: userData?.mobileNo || "0123456789" },
+    { label: "Họ", value: userData?.firstName || "Chưa cập nhật" },
+    { label: "Tên", value: userData?.lastName || "Chưa cập nhật" },
+    { label: "Số điện thoại", value: userData?.mobileNo || "Chưa cập nhật" },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Hồ sơ cá nhân</Text>
-      {userData ? (
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#007AFF" />
+      ) : userData ? (
         <View style={styles.profileContainer}>
           <FlatList
             data={userInfo}
@@ -74,13 +72,14 @@ const ProfileScreen = ({ navigation, route }: TabsStackScreenProps<"Profile">) =
               </View>
             )}
           />
+
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={20} color="white" />
             <Text style={styles.logoutText}>Đăng xuất</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <Text>Đang tải dữ liệu...</Text>
+        <Text style={styles.noDataText}>Không có thông tin người dùng</Text>
       )}
     </SafeAreaView>
   );
@@ -88,14 +87,39 @@ const ProfileScreen = ({ navigation, route }: TabsStackScreenProps<"Profile">) =
 
 export default memo(ProfileScreen);
 
-// 🎨 CSS Styles
+// 🌟 **Thiết kế giao diện**
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f9f9f9", padding: 20, alignItems: "center" },
-  title: { fontSize: 24, fontWeight: "bold", color: "#333", marginBottom: 20 },
-  profileContainer: { width: "100%", padding: 20, backgroundColor: "#fff", borderRadius: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 5 },
-  infoRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#ddd" },
-  label: { fontSize: 16, fontWeight: "bold", color: "#555" },
+  container: { flex: 1, backgroundColor: "#F5F5F5", padding: 20, alignItems: "center" },
+  title: { fontSize: 26, fontWeight: "bold", color: "#333", marginBottom: 20 },
+  profileContainer: {
+    width: "100%",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0"
+  },
+  label: { fontSize: 16, fontWeight: "600", color: "#444" },
   value: { fontSize: 16, color: "#666" },
-  logoutButton: { marginTop: 20, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: "#FF3B30", padding: 12, borderRadius: 8 },
+  logoutButton: {
+    marginTop: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FF3B30",
+    padding: 14,
+    borderRadius: 8
+  },
   logoutText: { color: "white", fontSize: 16, fontWeight: "bold", marginLeft: 8 },
+  noDataText: { fontSize: 16, color: "#888", marginTop: 20 },
 });
