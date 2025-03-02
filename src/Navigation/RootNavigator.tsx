@@ -8,7 +8,9 @@ import OnBoardingScreen from "../Screens/OnboardingScreen";
 import TabsNavigator, { TabsStackParams } from "./TabsNavigation";
 import ProductDetails from "../Screens/ProductDetails";
 import CartScreen from "../Screens/CartScreen";
+import PaymentScreen from "../Screens/PaymentScreen"; // ✅ Thêm PaymentScreen
 import UserAuth from "../Screens/LoginRegisterScreen";
+import ProfileScreen from "../Screens/ProfileScreen";
 
 // Định nghĩa kiểu dữ liệu cho RootStackParams
 export type RootStackParams = {
@@ -37,8 +39,7 @@ export type RootStackParams = {
     description?: string;
     quantity: number;
   };
-
-  // Thêm UserLogin vào RootStackParams
+  Payment: { totalAmount: number }; // ✅ Thêm Payment vào RootStackParams
   UserLogin: {
     email?: string;
     password?: string;
@@ -80,8 +81,18 @@ const RootNavigator = () => {
         options={{ headerShown: false }}
       />
       <RootStack.Screen
+        name="Payment" // ✅ Thêm màn hình Payment vào RootNavigator
+        component={PaymentScreen}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
         name="UserLogin"
         component={UserAuth}
+        options={{ headerShown: false }}
+      />
+      <RootStack.Screen
+        name="Profile"
+        component={ProfileScreen}
         options={{ headerShown: false }}
       />
     </RootStack.Navigator>

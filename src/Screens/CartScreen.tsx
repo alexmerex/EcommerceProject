@@ -1,4 +1,4 @@
-import { View, Text, Platform, Alert, Pressable } from "react-native";
+import { View, Text, Platform, Pressable } from "react-native";
 import React, { useContext, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeadersComponent } from "../Components/HeaderComponents/HeaderComponent";
@@ -8,21 +8,19 @@ import { CartState } from "../TypesCheck/productCartTypes";
 import DisplayMessage from "../Components/ProductDetails/DisplayMessage";
 import { UserType } from "../Components/LoginRegisterComponents/UserContext";
 
-// ✅ Bổ sung useContext để lấy thông tin user
-const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
+const CartScreen = ({ navigation }: TabsStackScreenProps<"Cart">) => {
   const cart = useSelector((state: CartState) => state.cart.cart);
 
-  // ✅ Hiển thị thông tin giỏ hàng trên console
   console.log("Cart Items:", cart);
 
-  // ✅ Thêm state `message` và `displayMessage`
   const [message, setMessage] = useState("");
   const [displayMessage, setDisplayMessage] = useState<boolean>(false);
 
-  // ✅ Lấy thông tin user từ context
-  const { getUserId, setGetUserId } = useContext(UserType);
+  const { getUserId } = useContext(UserType); // ✅ Lấy userId từ context
 
-  // ✅ Hàm điều hướng đến giỏ hàng
+  // ✅ Tính tổng tiền đơn hàng
+  const totalAmount = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
   const gotoCartScreen = () => {
     if (cart.length === 0) {
       setMessage("Cart is empty. Please add products to cart.");
@@ -34,7 +32,6 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
     }
   };
 
-  // ✅ Hàm quay lại màn hình trước
   const goToPreviousScreen = () => {
     if (navigation.canGoBack()) {
       console.log("Chuyển về trang trước.");
@@ -45,15 +42,21 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
     }
   };
 
-  // ✅ Hàm xử lý mua hàng
+  // ✅ Xử lý mua hàng: Nếu có user thì chuyển đến màn hình Payment
   const proceed = () => {
-    if (getUserId === "") {
-      navigation.navigate("UserLogin", { screenTitle: "User Authentication" });
+    if (!getUserId) {
+      // ✅ Nếu chưa đăng nhập, điều hướng đến UserLogin và truyền cả `totalAmount`
+      navigation.navigate("UserLogin", {
+        redirectTo: "Payment",
+        totalAmount, // ✅ Truyền tổng tiền qua màn hình đăng nhập
+        previousScreen: "CartScreen"
+      });
     } else {
       if (cart.length === 0) {
         navigation.navigate("TabsStack", { screen: "Home" });
       } else {
-        Alert.alert("Proceeding with checkout...");
+        // ✅ Đảm bảo tổng tiền được truyền chính xác đến PaymentScreen
+        navigation.navigate("Payment", { totalAmount });
       }
     }
   };
@@ -66,13 +69,10 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
         backgroundColor: "black",
       }}
     >
-      {/* ✅ Hiển thị thông báo nếu giỏ hàng trống */}
       {displayMessage && <DisplayMessage message={message} visible={() => setDisplayMessage(!displayMessage)} />}
 
-      {/* ✅ Truyền thêm `gotoCartScreen` và `goToPreviousScreen` */}
       <HeadersComponent gotoCartScreen={gotoCartScreen} cartLength={cart.length} gotoPrevious={goToPreviousScreen} />
 
-      {/* ✅ Hiển thị thông tin sản phẩm nếu có */}
       {cart.length > 0 ? (
         <View style={{ padding: 20 }}>
           {cart.map((item, index) => (
@@ -84,6 +84,11 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
               <Text style={{ color: "white", fontSize: 16 }}>Số lượng: {item.quantity}</Text>
             </View>
           ))}
+
+          {/* ✅ Hiển thị tổng tiền */}
+          <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", marginTop: 10 }}>
+            Tổng tiền: {totalAmount.toLocaleString()} $
+          </Text>
         </View>
       ) : (
         <Text style={{ color: "white", textAlign: "center", marginTop: 20 }}>Giỏ hàng trống</Text>
@@ -103,7 +108,7 @@ const CartScreen = ({ navigation, route }: TabsStackScreenProps<"Cart">) => {
         }}
       >
         <Text style={{ fontSize: 28, fontWeight: "bold", color: "purple" }}>
-          Click to buy ({cart.length})
+          Thanh toán ({cart.length})
         </Text>
       </Pressable>
     </SafeAreaView>

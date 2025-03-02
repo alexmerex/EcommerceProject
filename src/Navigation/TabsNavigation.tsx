@@ -6,11 +6,11 @@ import { CompositeScreenProps } from "@react-navigation/native";
 import { RootStackScreenProps } from "./RootNavigator";
 import HomeScreen from "../Screens/HomeScreen";
 import CartScreen from "../Screens/CartScreen";
-import PaymentScreen from "../Screens/PaymentScreen";
 import ProfileScreen from "../Screens/ProfileScreen";
+import PaymentScreen from "../Screens/PaymentScreen"; // 🆕 Thêm màn hình thanh toán
 import { Entypo, AntDesign, Ionicons } from "@expo/vector-icons";
 
-// ✅ Cập nhật TabsStackParams với tham số cho Cart
+// ✅ Cập nhật TabsStackParams
 export type TabsStackParams = {
   Home: undefined;
   Cart?: {
@@ -22,8 +22,8 @@ export type TabsStackParams = {
     size?: string;
     quantity: number;
   };
-  Payment: undefined;
   Profile: undefined;
+  Payment?: { totalAmount: number }; // 🆕 Thêm Payment vào điều hướng
 };
 
 const TabsStack = createBottomTabNavigator<TabsStackParams>();
@@ -64,19 +64,6 @@ const TabsNavigator = () => {
         }}
       />
       <TabsStack.Screen
-        name="Payment"
-        component={PaymentScreen}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            focused ? (
-              <Ionicons name="copy" size={24} color="#00970a" />
-            ) : (
-              <Ionicons name="copy-outline" size={24} color="#000" />
-            ),
-        }}
-      />
-      <TabsStack.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
@@ -88,6 +75,11 @@ const TabsNavigator = () => {
               <Ionicons name="person-outline" size={24} color="#000" />
             ),
         }}
+      />
+      <TabsStack.Screen
+        name="Payment"
+        component={PaymentScreen} // 🆕 Thêm màn hình thanh toán
+        options={{ tabBarButton: () => null, headerShown: false }}
       />
     </TabsStack.Navigator>
   );

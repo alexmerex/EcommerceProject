@@ -1,25 +1,25 @@
 import React, { createContext, useState, ReactNode } from "react";
 
-interface IgetUserId {
-    getUserId: string | null;
-    setGetUserId: (getUserId: string) => void;
+interface IUserContext {
+    userId: string | null; // 🔹 Đổi tên từ getUserId → userId
+    setUserId: (id: string) => void; // 🔹 Đổi tên từ setGetUserId → setUserId
 }
 
-const defaultValue: IgetUserId = {
-    getUserId: "",
-    setGetUserId: () => { },
+const defaultValue: IUserContext = {
+    userId: null,
+    setUserId: () => { },
 };
 
-const UserType = createContext(defaultValue);
+const UserType = createContext<IUserContext>(defaultValue);
 
-const UserContext = ({ children }: { children: ReactNode }) => {
-    const [getUserId, setGetUserId] = useState<string | null>("");
+const UserProvider = ({ children }: { children: ReactNode }) => {
+    const [userId, setUserId] = useState<string | null>(null);
 
     return (
-        <UserType.Provider value={{ getUserId, setGetUserId }}>
+        <UserType.Provider value={{ userId, setUserId }}>
             {children}
         </UserType.Provider>
     );
 };
 
-export { UserType, UserContext };
+export { UserType, UserProvider };
