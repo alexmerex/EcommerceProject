@@ -50,10 +50,10 @@ export const userLogin = [
                 return;
             }
 
+            // Trả về toàn bộ thông tin user
             res.status(200).json({
                 message: "Login successful!",
-                _id: user._id,  // Trả về _id của user
-                email: user.email
+                user: user // Trả về toàn bộ thông tin của user
             });
         } catch (error: unknown) {
             const err = error as Error;
@@ -61,3 +61,4 @@ export const userLogin = [
         }
     }
 ];
+

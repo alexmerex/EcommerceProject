@@ -29,16 +29,27 @@ const UserAuth = ({ navigation, route }: RootStackScreenProps<"UserLogin">) => {
     }, []);
 
     // 📌 Xử lý điều hướng sau đăng nhập
-    const handleLoginSuccess = async (userId: string) => {
-        await AsyncStorage.setItem("userId", userId);
-        Alert.alert("Đăng nhập thành công!");
+    const handleLoginSuccess = async (userData: any) => {
+        console.log("Dữ liệu userData nhận được:", userData); // Log dữ liệu userData
 
-        if (previousScreen === "CartScreen") {
-            navigation.replace("Payment", { totalAmount });
-        } else {
-            navigation.navigate("TabsStack", { screen: "Profile", userId });
+        try {
+            await AsyncStorage.setItem("userData", JSON.stringify(userData));
+            Alert.alert("Đăng nhập thành công!");
+
+            if (previousScreen === "CartScreen") {
+                console.log("Chuyển hướng đến Payment với totalAmount:", totalAmount);
+                navigation.replace("Payment", { totalAmount });
+            } else {
+                console.log("Chuyển hướng đến Profile với userData:", userData);
+                navigation.navigate("TabsStack", { screen: "Profile", params: { userData } });
+            }
+        } catch (error) {
+            console.error("Lỗi khi lưu dữ liệu vào AsyncStorage:", error);
         }
     };
+
+
+
 
     // 📌 Đăng nhập
     const handleLogin = async () => {
@@ -49,13 +60,14 @@ const UserAuth = ({ navigation, route }: RootStackScreenProps<"UserLogin">) => {
         setLoading(true);
         try {
             const { data } = await axios.post("http://172.168.11.225:9000/user/loginUser", user);
-            handleLoginSuccess(data._id);
+            handleLoginSuccess(data);  // Lưu toàn bộ thông tin user vào AsyncStorage
         } catch (error) {
             Alert.alert("Lỗi đăng nhập", error.response?.data?.message || "Có lỗi xảy ra");
         } finally {
             setLoading(false);
         }
     };
+
 
     // 📌 Đăng ký
     const handleRegister = async () => {
