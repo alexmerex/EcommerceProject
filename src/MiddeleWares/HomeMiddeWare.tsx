@@ -95,7 +95,7 @@ export const fetchTrendingProducts = async ({ setTrendingProducts }: ITrendingPr
 
 export const searchProductsByName = async ({ name, setSearchResults }: { name: string, setSearchResults: Function }) => {
     try {
-        const API_URL = "http://10.106.21.117:9000/api/products/searchProductsByName"; // Cập nhật IP máy tính
+        const API_URL = "http://10.106.21.117:9000/product/searchProductsByName"; // Cập nhật IP máy tính
 
         const response = await fetch(`${API_URL}?name=${encodeURIComponent(name)}`);
 
