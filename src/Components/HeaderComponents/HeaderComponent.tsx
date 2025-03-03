@@ -1,7 +1,18 @@
-import { View, Text, StyleSheet, Pressable, TextInput, FlatList } from "react-native";
 import React, { useState } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    Pressable,
+    TextInput,
+    FlatList,
+    ActivityIndicator
+} from "react-native";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { GoBack } from "./GoBackButton";
+import { useNavigation } from "@react-navigation/native";
+
+const API_URL = "http://10.106.21.117:9000/product/searchProductsByName";
 
 interface IHeaderParams {
     pageTitle?: string;
@@ -10,37 +21,49 @@ interface IHeaderParams {
     gotoCartScreen?: () => void;
 }
 
-const API_URL = "http://10.106.21.117:9000/searchProductsByName";
-
 export const HeadersComponent = ({
     pageTitle,
     gotoPrevious,
     cartLength = 0,
     gotoCartScreen,
 }: IHeaderParams) => {
+    // Sử dụng useNavigation để điều hướng đến trang productDetails
+    const navigation = useNavigation<any>();
+
+    // Quản lý trạng thái tìm kiếm hoàn toàn bên trong HeadersComponent
     const [searchText, setSearchText] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
+    const [searchResults, setSearchResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
     const handleSearch = async (text: string) => {
         setSearchText(text);
-
         if (text.trim().length > 0) {
             setLoading(true);
             try {
-                const response = await fetch(`${API_URL}?name=${text}`);
-                if (!response.ok) throw new Error("Server không phản hồi");
-
+                // Sử dụng encodeURIComponent để đảm bảo tham số truyền vào URL không gây lỗi
+                const response = await fetch(`${API_URL}?name=${encodeURIComponent(text)}`);
+                if (!response.ok) {
+                    console.error("Response status:", response.status);
+                    throw new Error("Server không phản hồi");
+                }
                 const data = await response.json();
-                setSearchResults(data);
-            } catch (error) {
-                console.error("❌ Lỗi khi tìm kiếm sản phẩm:", error);
+                // Chuyển đổi URL hình ảnh từ "http://localhost" thành "http://10.106.21.117"
+                const fixedData = data.map((item: any) => ({
+                    ...item,
+                    images: item.images.map((img: string) =>
+                        img.replace("http://localhost", "http://10.106.21.117")
+                    )
+                }));
+                setSearchResults(fixedData);
+            } catch (error: any) {
+                console.error("❌ Lỗi khi tìm kiếm sản phẩm:", error.message);
                 setSearchResults([]);
             } finally {
                 setLoading(false);
             }
         } else {
-            setSearchResults([]); // Xóa kết quả nếu input trống
+            // Xóa kết quả nếu input trống
+            setSearchResults([]);
         }
     };
 
@@ -83,7 +106,10 @@ export const HeadersComponent = ({
                         data={searchResults}
                         keyExtractor={(item) => item._id}
                         renderItem={({ item }) => (
-                            <Pressable style={styles.searchResultItem}>
+                            <Pressable
+                                style={styles.searchResultItem}
+                                onPress={() => navigation.navigate("productDetails", item)}
+                            >
                                 <Text style={styles.searchResultText}>{item.name}</Text>
                             </Pressable>
                         )}
@@ -92,7 +118,12 @@ export const HeadersComponent = ({
             )}
 
             {/* Loading Indicator */}
-            {loading && <Text style={styles.loadingText}>🔎 Đang tìm kiếm...</Text>}
+            {loading && (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="small" color="#000" />
+                    <Text style={styles.loadingText}>Đang tìm kiếm...</Text>
+                </View>
+            )}
         </View>
     );
 };
@@ -174,14 +205,21 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#000",
     },
-    loadingText: {
+    loadingContainer: {
         position: "absolute",
         top: 60,
-        left: "50%",
-        transform: [{ translateX: -50 }],
+        left: 10,
+        right: 10,
         backgroundColor: "#fff",
-        padding: 10,
         borderRadius: 10,
+        padding: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 10,
+    },
+    loadingText: {
+        marginLeft: 10,
         color: "#000",
     },
 });

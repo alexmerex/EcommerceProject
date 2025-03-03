@@ -21,7 +21,7 @@ import { HeadersComponent } from "../Components/HeaderComponents/HeaderComponent
 import {
   fetchCategories,
   fetchProductsByCatID,
-  searchProductsByName,
+  // searchProductsByName đã được gỡ bỏ vì giờ đã chuyển sang HeaderComponent
 } from "../MiddeleWares/HomeMiddeWare";
 
 import { ProductListParams } from "../TypesCheck/HomeProps";
@@ -36,9 +36,6 @@ const HomeScreen = ({ navigation }: TabsStackScreenProps<"Home">) => {
   const [getCategory, setGetCategory] = useState<ProductListParams[]>([]);
   const [getProductsByCatID, setGetProductsByCatID] = useState<ProductListParams[]>([]);
   const [activeCat, setActiveCat] = useState<string>("");
-
-  const [searchText, setSearchText] = useState("");
-  const [searchResults, setSearchResults] = useState<ProductListParams[]>([]);
 
   useEffect(() => {
     if (activeCat) {
@@ -63,15 +60,6 @@ const HomeScreen = ({ navigation }: TabsStackScreenProps<"Home">) => {
     }
   };
 
-  const handleSearch = async (text: string) => {
-    setSearchText(text);
-    if (text.trim().length > 0) {
-      await searchProductsByName({ name: text, setSearchResults });
-    } else {
-      setSearchResults([]);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       {displayMessage && (
@@ -81,36 +69,14 @@ const HomeScreen = ({ navigation }: TabsStackScreenProps<"Home">) => {
         />
       )}
 
-      {/* Sử dụng HeadersComponent */}
+      {/* Sử dụng HeaderComponent mới, nó sẽ đảm nhận toàn bộ chức năng tìm kiếm */}
       <HeadersComponent
         pageTitle="Home"
-        searchText={searchText}
-        setSearchText={handleSearch}
         cartLength={cart.length}
         gotoCartScreen={gotoCartScreen}
       />
 
       <ScrollView>
-        {/* Kết quả tìm kiếm */}
-        {searchResults.length > 0 && (
-          <View style={styles.searchResultsContainer}>
-            <Text style={styles.sectionTitle}>Search Results</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productScroll}
-            >
-              {searchResults.map((item, index) => (
-                <ProductCard
-                  key={index}
-                  item={{ name: item.name, images: item.images, _id: item._id }}
-                  onPress={() => navigation.navigate("productDetails", item)}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
         {/* Image Slider */}
         <ImageSlider
           images={[
@@ -167,7 +133,6 @@ const HomeScreen = ({ navigation }: TabsStackScreenProps<"Home">) => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   safeArea: {
     paddingTop: Platform.OS === "android" ? 40 : 0,
@@ -199,11 +164,6 @@ const styles = StyleSheet.create({
   },
   productScroll: {
     paddingHorizontal: 10,
-  },
-  searchResultsContainer: {
-    marginTop: 10,
-    backgroundColor: "lightgray",
-    padding: 10,
   },
 });
 
