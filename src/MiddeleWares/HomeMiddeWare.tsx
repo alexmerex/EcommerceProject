@@ -21,14 +21,14 @@ interface ITrendingProps {
 // 🚀 **Lấy danh sách danh mục sản phẩm**
 export const fetchCategories = async ({ setGetCategory }: ICatProps) => {
     try {
-        const response = await axios.get("http://192.168.100.202:9000/category/getAllCategories");
+        const response = await axios.get("http://10.106.21.117:9000/category/getAllCategories");
         console.log("fetchCategories - API Response:", response.data);
 
         if (Array.isArray(response.data)) {
             const fixedData = response.data.map(item => ({
                 ...item,
                 images: item.images.map((img: string) =>
-                    img.replace("http://localhost", "http://192.168.100.202")
+                    img.replace("http://localhost", "http://10.106.21.117")
                 )
             }));
 
@@ -46,14 +46,14 @@ export const fetchCategories = async ({ setGetCategory }: ICatProps) => {
 // 🚀 **Lấy danh sách sản phẩm theo danh mục**
 export const fetchProductsByCatID = async ({ setGetProductsByCatID, catID }: IProdByCatProps) => {
     try {
-        const response = await axios.get(`http://192.168.100.202:9000/product/getProductByCatID/${catID}`);
+        const response = await axios.get(`http://10.106.21.117:9000/product/getProductByCatID/${catID}`);
         console.log("fetchProductsByCatID - API Response:", response.data);
 
         if (Array.isArray(response.data)) {
             const fixedData = response.data.map(item => ({
                 ...item,
                 images: item.images.map((img: string) =>
-                    img.replace("http://localhost", "http://192.168.100.202")
+                    img.replace("http://localhost", "http://10.106.21.117")
                 )
             }));
 
@@ -71,14 +71,14 @@ export const fetchProductsByCatID = async ({ setGetProductsByCatID, catID }: IPr
 // 🚀 **Lấy danh sách sản phẩm xu hướng (trending)**
 export const fetchTrendingProducts = async ({ setTrendingProducts }: ITrendingProps) => {
     try {
-        const response = await axios.get("http://192.168.100.202:9000/product/getTrendingProducts");
+        const response = await axios.get("http://10.106.21.117:9000/product/getTrendingProducts");
         console.log("fetchTrendingProducts - API Response:", response.data);
 
         if (Array.isArray(response.data)) {
             const fixedData = response.data.map(item => ({
                 ...item,
                 images: item.images.map((img: string) =>
-                    img.replace("http://localhost", "http://192.168.100.202")
+                    img.replace("http://localhost", "http://10.106.21.117")
                 )
             }));
 
@@ -95,7 +95,7 @@ export const fetchTrendingProducts = async ({ setTrendingProducts }: ITrendingPr
 
 export const searchProductsByName = async ({ name, setSearchResults }: { name: string, setSearchResults: Function }) => {
     try {
-        const API_URL = "http://192.168.100.202:9000/api/products/searchProductsByName"; // Cập nhật IP máy tính
+        const API_URL = "http://10.106.21.117:9000/api/products/searchProductsByName"; // Cập nhật IP máy tính
 
         const response = await fetch(`${API_URL}?name=${encodeURIComponent(name)}`);
 

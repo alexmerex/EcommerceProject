@@ -1,33 +1,28 @@
-import express, { RequestHandler } from 'express';
-import multer from 'multer';
-import path from 'path';
-import {
-    createProduct,
-    getAllProducts,
-    getFeaturedProducts,
-    getProductByCatID,
-    getProductByID
-} from '../Controllers/ProductControllers';
+import express, { Request, Response } from 'express'
+import multer from 'multer'
+import path from 'path'
+import { createProduct, getAllProducts, getFeaturedProducts, getProductByCatID, getProductByID, searchProductsByName } from '../Controllers/ProductControllers';
+
 
 const router = express.Router();
-
-// ⚙ Cấu hình lưu trữ hình ảnh
 const imagesStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'assets');
+        cb(null, 'assets')
     },
     filename: function (req, file, cb) {
-        cb(null, req.body.name + "-" + Date.now() + path.extname(file.originalname));
+        cb(null, req.body.name + "-" + Date.now() + path.extname(file.originalname))
     }
-});
+})
 
-const images = multer({ storage: imagesStorage }).array('images') as RequestHandler;
+const images = multer({ storage: imagesStorage }).array('images');
 
-// 🛠 Định nghĩa các route API
-router.post('/createProduct', images, createProduct as RequestHandler);
-router.get('/getProductByCatID/:CatID', getProductByCatID as RequestHandler);
-router.get('/getProductByID/:id', getProductByID as RequestHandler);
-router.get('/getAllProducts', getAllProducts as RequestHandler);
-router.get('/getFeaturedProducts', getFeaturedProducts as RequestHandler);
+router.post('/createProduct', images, createProduct);
+router.get('/getProductByCatID/:CatID', getProductByCatID);
+router.get('/getProductByID/:id', getProductByID);
+router.get('/getAllProducts', getAllProducts);
+router.get('/getFeaturedProducts', getFeaturedProducts);
+router.get('/searchProductsByName', searchProductsByName);
 
 export { router as ProductRoute };
+
+

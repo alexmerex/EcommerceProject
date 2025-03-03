@@ -6,7 +6,6 @@ import {
   ScrollView,
   Alert,
   StyleSheet,
-  TextInput,
 } from "react-native";
 import { TabsStackScreenProps } from "../Navigation/TabsNavigation";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,6 +16,7 @@ import ImageSlider from "../Components/HomeScreenComponents/ImageSlider";
 import { CategoryCard } from "../Components/HomeScreenComponents/CategoryCard";
 import { ProductCard } from "../Components/HomeScreenComponents/ProductCard";
 import DisplayMessage from "../Components/ProductDetails/DisplayMessage";
+import { HeadersComponent } from "../Components/HeaderComponents/HeaderComponent";
 
 import {
   fetchCategories,
@@ -81,46 +81,37 @@ const HomeScreen = ({ navigation }: TabsStackScreenProps<"Home">) => {
         />
       )}
 
-      {/* Header with Search and Cart */}
-      <View style={styles.header}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search Items ..."
-          placeholderTextColor="white"
-          value={searchText}
-          onChangeText={handleSearch}
-        />
-        <Text onPress={gotoCartScreen} style={styles.cartIcon}>
-          🛒
-        </Text>
-      </View>
+      {/* Sử dụng HeadersComponent */}
+      <HeadersComponent
+        pageTitle="Home"
+        searchText={searchText}
+        setSearchText={handleSearch}
+        cartLength={cart.length}
+        gotoCartScreen={gotoCartScreen}
+      />
 
-      {/* Search Results */}
-      {searchResults.length > 0 && (
-        <View style={styles.searchResultsContainer}>
-          <Text style={styles.sectionTitle}>Search Results</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.productScroll}
-          >
-            {searchResults.map((item, index) => (
-              <ProductCard
-                key={index}
-                item={{ name: item.name, images: item.images, _id: item._id }}
-                onPress={() => navigation.navigate("productDetails", item)}
-              />
-            ))}
-          </ScrollView>
-        </View>
-      )}
+      <ScrollView>
+        {/* Kết quả tìm kiếm */}
+        {searchResults.length > 0 && (
+          <View style={styles.searchResultsContainer}>
+            <Text style={styles.sectionTitle}>Search Results</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.productScroll}
+            >
+              {searchResults.map((item, index) => (
+                <ProductCard
+                  key={index}
+                  item={{ name: item.name, images: item.images, _id: item._id }}
+                  onPress={() => navigation.navigate("productDetails", item)}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
-      {/* Image Slider */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.imageSliderContainer}
-      >
+        {/* Image Slider */}
         <ImageSlider
           images={[
             "https://gomsuhcm.com/wp-content/uploads/2023/12/Tho-tet-2-cau-hai-huoc-cho-nam-2024.jpg",
@@ -129,49 +120,49 @@ const HomeScreen = ({ navigation }: TabsStackScreenProps<"Home">) => {
             "https://bizweb.dktcdn.net/thumb/1024x1024/100/408/770/products/d373f758-620f-4da0-b31e-6c993c0195fe.jpg",
           ]}
         />
-      </ScrollView>
 
-      {/* Categories Section */}
-      <View style={styles.categoriesContainer}>
-        <Text style={styles.categoriesTitle}>Categories</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryScroll}
-        >
-          {getCategory.map((item, index) => (
-            <CategoryCard
-              key={index}
-              item={{ name: item.name, images: item.images, _id: item._id }}
-              catStyleProps={styles.categoryCard}
-              catProps={{ activeCat, onPress: () => setActiveCat(item._id) }}
-            />
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Products from Selected Category */}
-      <View style={styles.productSection}>
-        <Text style={styles.sectionTitle}>Products from Selected Category</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.productScroll}
-        >
-          {getProductsByCatID.length > 0 ? (
-            getProductsByCatID.map((item, index) => (
+        {/* Danh mục sản phẩm */}
+        <View style={styles.categoriesContainer}>
+          <Text style={styles.categoriesTitle}>Categories</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryScroll}
+          >
+            {getCategory.map((item, index) => (
               <CategoryCard
                 key={index}
                 item={{ name: item.name, images: item.images, _id: item._id }}
-                catStyleProps={styles.productCard}
-                catProps={{ onPress: () => navigation.navigate("productDetails", item) }}
+                catStyleProps={styles.categoryCard}
+                catProps={{ activeCat, onPress: () => setActiveCat(item._id) }}
               />
-            ))
-          ) : (
-            <Text>No products available</Text>
-          )}
-        </ScrollView>
-      </View>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Sản phẩm theo danh mục */}
+        <View style={styles.productSection}>
+          <Text style={styles.sectionTitle}>Products from Selected Category</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.productScroll}
+          >
+            {getProductsByCatID.length > 0 ? (
+              getProductsByCatID.map((item, index) => (
+                <CategoryCard
+                  key={index}
+                  item={{ name: item.name, images: item.images, _id: item._id }}
+                  catStyleProps={styles.productCard}
+                  catProps={{ onPress: () => navigation.navigate("productDetails", item) }}
+                />
+              ))
+            ) : (
+              <Text>No products available</Text>
+            )}
+          </ScrollView>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -182,28 +173,6 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? 40 : 0,
     flex: 1,
     backgroundColor: "black",
-  },
-  header: {
-    backgroundColor: "#333",
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    justifyContent: "space-between",
-  },
-  searchInput: {
-    flex: 1,
-    backgroundColor: "#555",
-    color: "white",
-    borderRadius: 20,
-    padding: 10,
-    marginRight: 10,
-  },
-  cartIcon: {
-    color: "white",
-    fontSize: 30,
-  },
-  imageSliderContainer: {
-    marginTop: 10,
   },
   categoriesContainer: {
     marginTop: 20,
